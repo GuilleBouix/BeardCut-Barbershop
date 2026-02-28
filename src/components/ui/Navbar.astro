@@ -1,0 +1,68 @@
+﻿---
+import { Menu, X } from '@lucide/astro';
+---
+
+<!-- Navbar -->
+<header class="fixed top-0 left-0 w-full p-5 z-50 backdrop-blur-xl flex items-center justify-center max-md:justify-between">
+    <img src="/images/icon.png" class="hidden w-10 max-md:block">
+
+    <!-- Menú de navegación -->
+    <nav id="menu" class="flex jus items-center space-x-12 text-sm text-gray-300 font-light max-md:hidden">
+        <a class="nav-link opacity-80 hover:opacity-100 outline-none hover:text-white duration-200" href="/#home">
+            Home
+        </a>
+
+        <a class="nav-link opacity-80 hover:opacity-100 outline-none hover:text-white duration-200" href="/#about">
+            About
+        </a>
+
+        <a class="nav-link opacity-80 hover:opacity-100 outline-none hover:text-white duration-200" href="/#team">
+            Team
+        </a>
+
+        <a class="nav-link opacity-80 hover:opacity-100 outline-none hover:text-white duration-200" href="/#services">
+            Services
+        </a>
+
+        <a class="nav-link opacity-80 hover:opacity-100 outline-none hover:text-white duration-200" href="/#contact">
+            Contact
+        </a>
+    </nav>
+
+    <!-- Botón del menú hamburguesa -->
+    <button id="menu-button" class="hidden items-center justify-center cursor-pointer text-3xl text-gray-300 duration-300 hover:text-white max-md:flex max-md:ml-auto" aria-expanded="false" aria-controls="mobile-menu" aria-label="Abrir menú">
+        <span id="icon-menu" aria-hidden="true">
+            <Menu />
+        </span>
+        <span id="icon-close" class="hidden" aria-hidden="true">
+            <X />
+        </span>
+    </button>
+</header>
+
+<!-- Menú desplegable -->
+<div id="mobile-menu" class="fixed top-17.5 left-0 w-full backdrop-blur-xl z-40 border-t border-[#3d3d3d] transition-all duration-300 ease-out md:hidden max-h-0 opacity-0 -translate-y-2 pointer-events-none overflow-hidden">
+    <nav class="flex flex-col p-5">
+        <a class="nav-link text-gray-300 outline-none py-3 duration-300 hover:text-white" href="/#inicio">
+            Home
+        </a>
+
+        <a class="nav-link text-gray-300 outline-none py-3 duration-300 hover:text-white" href="/#nosotros">
+            About
+        </a>
+
+        <a class="nav-link text-gray-300 outline-none py-3 duration-300 hover:text-white" href="/#nosotros">
+            Team
+        </a>
+
+        <a class="nav-link text-gray-300 outline-none py-3 duration-300 hover:text-white" href="/#servicios">
+            Services
+        </a>
+
+        <a class="nav-link text-gray-300 outline-none py-3 duration-300 hover:text-white" href="/#contacto">
+            Contact
+        </a>
+    </nav>
+</div>
+
+<script src="../../scripts/navbar.ts"></script>

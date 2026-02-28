@@ -1,0 +1,31 @@
+﻿---
+import type { ServicesTableProps } from '../../types/services-table';
+
+const { heading, items, className = '' } = Astro.props as ServicesTableProps;
+---
+
+<article class={`overflow-hidden border border-[#2f2f2f] bg-black/30 p-4 sm:p-5 ${className}`}>
+    <div class="pb-3">
+        <h3 class="font-semibold text-xl sm:text-2xl text-white">
+            {heading}
+        </h3>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <tbody>
+                {items.map((item, index) => (
+                    <tr class={index < items.length - 1 ? 'border-b border-[#4a4a4a]' : ''}>
+                        <td class="py-4 text-[#a0a0a0] text-sm sm:text-base">
+                            {item.label}
+                        </td>
+
+                        <td class="py-4 text-right text-white font-medium text-sm sm:text-base">
+                            {item.cost}
+                        </td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    </div>
+</article>

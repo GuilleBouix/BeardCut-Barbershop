@@ -1,0 +1,21 @@
+﻿---
+import type { ContactInfoItemProps } from '../../types/contact-info-item';
+
+const { heading, value } = Astro.props as ContactInfoItemProps;
+---
+
+<article class="flex items-start gap-4 rounded-sm bg-transparent py-4 sm:py-5">
+    <div class="h-10 w-10 shrink-0 rounded-full border border-[#4a4a4a] bg-black/40 flex items-center justify-center text-[#b9b9b9]">
+        <slot name="icon" />
+    </div>
+
+    <div class="min-w-0">
+        <h4 class="text-[#cfcfcf] text-xs sm:text-md tracking-[0.12em] uppercase">
+            {heading}
+        </h4>
+
+        <p class="text-[#9d9d9d] text-sm sm:text-md leading-relaxed mt-1 wrap-break-words">
+            {value}
+        </p>
+    </div>
+</article>

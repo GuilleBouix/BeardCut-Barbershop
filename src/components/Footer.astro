@@ -1,0 +1,81 @@
+﻿---
+import { MapPin, Phone, Mail, Instagram, Facebook } from '@lucide/astro';
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="px-6 lg:px-20 2xl:px-30">
+    <div class="border-t border-[#343434] backdrop-blur-sm">
+        <div class="mx-auto w-full max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
+            <div class="grid grid-cols-1 gap-10 md:grid-cols-2 xl:grid-cols-4">
+                <section>
+                    <div class="flex items-center gap-3">
+                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#4a4a4a] bg-black/40 text-[#cfcfcf]">
+                            <img src="favicon.svg" alt="BeardCut Logo" class="h-6 w-6" />
+                        </span>
+                        <div>
+                            <p class="font-playfair text-2xl text-white">BeardCut</p>
+                            <p class="text-xs uppercase tracking-[0.18em] text-[#8f8f8f]">Barbershop</p>
+                        </div>
+                    </div>
+
+                    <p class="mt-4 max-w-sm text-sm leading-relaxed text-[#9d9d9d]">
+                        Premium barber services with classic technique and modern style. Precise cuts, clean fades and an experience designed around your look.
+                    </p>
+                </section>
+
+                <nav aria-label="Footer navigation">
+                    <h3 class="text-sm uppercase tracking-[0.14em] text-[#cfcfcf]">Quick Links</h3>
+                    <ul class="mt-4 space-y-3 text-sm text-[#9d9d9d]">
+                        <li><a href="/#home" class="transition hover:text-white">Home</a></li>
+                        <li><a href="/#about" class="transition hover:text-white">About</a></li>
+                        <li><a href="/#team" class="transition hover:text-white">Team</a></li>
+                        <li><a href="/#services" class="transition hover:text-white">Services</a></li>
+                        <li><a href="/#contact" class="transition hover:text-white">Contact</a></li>
+                    </ul>
+                </nav>
+
+                <section>
+                    <h3 class="text-sm uppercase tracking-[0.14em] text-[#cfcfcf]">Contact</h3>
+                    <ul class="mt-4 space-y-3 text-sm text-[#9d9d9d]">
+                        <li class="flex items-start gap-3">
+                            <MapPin size={16} class="mt-0.5 shrink-0" />
+                            <span>Av. Beltrame N3360, Oberá, Misiones</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <Phone size={16} class="shrink-0" />
+                            <a href="tel:+5493711365214" class="transition hover:text-white">+54 9 3711-365214</a>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <Mail size={16} class="shrink-0" />
+                            <a href="mailto:contact@beardcut.com" class="transition hover:text-white">contact@beardcut.com</a>
+                        </li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3 class="text-sm uppercase tracking-[0.14em] text-[#cfcfcf]">Hours</h3>
+                    <ul class="mt-4 space-y-2 text-sm text-[#9d9d9d]">
+                        <li>Monday - Friday: 09:00 - 20:00</li>
+                        <li>Saturday: 09:00 - 18:00</li>
+                        <li>Sunday: Closed</li>
+                    </ul>
+
+                    <div class="mt-5 flex items-center gap-3" aria-label="Social media links">
+                        <a href="#" class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#4a4a4a] text-[#a8a8a8] transition hover:border-[#7a7a7a] hover:text-white" aria-label="Instagram">
+                            <Instagram size={16} />
+                        </a>
+                        <a href="#" class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#4a4a4a] text-[#a8a8a8] transition hover:border-[#7a7a7a] hover:text-white" aria-label="Facebook">
+                            <Facebook size={16} />
+                        </a>
+                    </div>
+                </section>
+            </div>
+
+            <div class="mt-8 border-t border-[#343434] pt-5 text-xs text-[#777] flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <p>© {currentYear} BeardCut Barbershop. All rights reserved.</p>
+                <p>Developed by <a href="https://guillebouix.vercel.app" target="_blank" class="text-white hover:underline">@bouixdev</a></p>
+            </div>
+        </div>
+    </div>
+</footer>

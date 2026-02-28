@@ -1,0 +1,40 @@
+@import "tailwindcss";
+@import "tailwindcss-animated";
+
+/* Fuente Personalizada */
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/Geist-VariableFont_wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Playfair";
+  src: url("/fonts/PlayfairDisplay-VariableFont_wght.ttf");
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+/* Aplicarla globalmente */
+:root {
+  font-family: "Geist", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-image: url("/images/background-2.jpg");
+  background-size: cover;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+:root {
+  --font-playfair: "Playfair";
+  --breakpoint-2xs: 30rem;
+  --breakpoint-1xs: 20rem;
+}

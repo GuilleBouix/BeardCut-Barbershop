@@ -1,0 +1,25 @@
+﻿---
+import type { TeamCardProps } from '../../types/team-card';
+
+const { img, specialization, name, experience } = Astro.props as TeamCardProps;
+---
+
+<article class="group w-full rounded-sm border border-[#2f2f2f] bg-black/30 p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#4a4a4a] hover:bg-black/40">
+    <img
+        src={img}
+        alt={name}
+        class="w-full h-72 sm:h-80 lg:h-72 xl:h-80 object-cover rounded-xs mb-4 grayscale transition duration-300 group-hover:grayscale-0"
+    />
+
+    <strong class="block text-[#8F8F8F] text-xs sm:text-sm font-medium tracking-[0.12em] uppercase">
+        {specialization}
+    </strong>
+
+    <h3 class="font-semibold text-2xl sm:text-3xl text-white text-left mt-1 mb-2 leading-tight">
+        {name}
+    </h3>
+
+    <p class="text-[#9b9b9b] text-sm sm:text-base leading-relaxed">
+        {experience}
+    </p>
+</article>

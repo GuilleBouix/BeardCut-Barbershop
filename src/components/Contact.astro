@@ -1,0 +1,66 @@
+﻿---
+import { MapPin, Phone, Mail } from '@lucide/astro';
+import ContactInfoItem from './ui/ContactInfoItem.astro';
+---
+
+<section id="contact" class="min-h-screen px-6 py-24 lg:px-20 2xl:px-30 flex items-center">
+    <div class="mx-auto w-full max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-stretch">
+        <article class="border border-[#2f2f2f] bg-black/30 p-6 sm:p-8 lg:p-10 flex flex-col justify-between">
+            <div>
+                <h2 class="font-playfair font-semibold text-3xl sm:text-4xl text-white mb-5">
+                    CONTACT
+                </h2>
+
+                <h3 class="text-white font-medium text-xl sm:text-xl mb-3">
+                    Ready for your next look?
+                </h3>
+
+                <p class="text-[#9d9d9d] leading-relaxed text-sm sm:text-base mb-6">
+                    Book your appointment and get a tailored service from our barbers. We combine classic barbering with modern style so you leave looking sharp and feeling confident.
+                </p>
+
+                <div>
+                    <ContactInfoItem
+                        heading="Address"
+                        value="Av. Beltrame N3360, Oberá, Misiones"
+                    >
+                        <MapPin slot="icon" size={18} />
+                    </ContactInfoItem>
+
+                    <ContactInfoItem
+                        heading="Phone"
+                        value="+54 9 3711-365214"
+                    >
+                        <Phone slot="icon" size={18} />
+                    </ContactInfoItem>
+
+                    <ContactInfoItem
+                        heading="Email"
+                        value="contact@beardcut.com"
+                    >
+                        <Mail slot="icon" size={18} />
+                    </ContactInfoItem>
+                </div>
+            </div>
+
+            <div class="mt-8 flex flex-wrap items-center gap-4">
+                <a href="/appointment" class="inline-flex items-center justify-center border border-white px-5 py-3 text-white hover:bg-white hover:text-black transition-colors duration-200">
+                    Book Online
+                </a>
+
+                <span class="text-xs sm:text-sm text-[#8f8f8f]">Lun - Sáb: 09:00 - 20:00</span>
+            </div>
+        </article>
+
+        <div class="border border-[#2f2f2f] bg-black/20 p-2 sm:p-3 lg:p-4 h-full">
+            <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3539.3172363814338!2d-55.107507525313714!3d-27.490507817591695!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94f8f51736c0d97d%3A0x29975b8967eb0de0!2sAv.%20Beltrame%2C%20N3360%20Ober%C3%A1%2C%20Misiones!5e0!3m2!1ses!2sar!4v1763651701976!5m2!1ses!2sar"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                class="w-full h-80 sm:h-105 lg:h-full min-h-115"
+                title="BeardCut location map"
+            ></iframe>
+        </div>
+    </div>
+</section>

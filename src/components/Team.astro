@@ -1,0 +1,34 @@
+﻿---
+import TeamCard from './ui/TeamCard.astro';
+---
+
+<section id="team" class="min-h-screen px-6 py-24 lg:px-20 2xl:px-30 flex items-center">
+    <div class="mx-auto w-full max-w-7xl">
+        <h2 class="font-playfair font-semibold text-white text-3xl sm:text-4xl">
+            NUESTRO EQUIPO
+        </h2>
+
+        <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+            <TeamCard
+                img="/images/barber-1.webp"
+                specialization="BARBERO ESTILISTA"
+                name="John Doe"
+                experience="Cortes clásicos."
+            />
+
+            <TeamCard
+                img="/images/barber-2.webp"
+                specialization="BARBERO ESTILISTA"
+                name="Michael Shawn"
+                experience="Diseño de barba."
+            />
+
+            <TeamCard
+                img="/images/barber-3.avif"
+                specialization="BARBERO ESTILISTA"
+                name="Marco Silva"
+                experience="Fade y degradados."
+            />
+        </div>
+    </div>
+</section>

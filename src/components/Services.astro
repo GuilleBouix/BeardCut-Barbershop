@@ -1,0 +1,102 @@
+﻿---
+import ServicesTable from './ui/ServicesTable.astro';
+import { ChevronsRight, ChevronsLeft } from '@lucide/astro';
+
+const galleryImages = [
+    { src: '/images/gallery-1.jpg', alt: 'Haircut gallery image 1' },
+    { src: '/images/gallery-2.jpg', alt: 'Haircut gallery image 2' },
+    { src: '/images/gallery-3.jpg', alt: 'Haircut gallery image 3' },
+    { src: '/images/gallery-4.jpg', alt: 'Haircut gallery image 4' },
+    { src: '/images/gallery-5.jpg', alt: 'Haircut gallery image 5' },
+    { src: '/images/gallery-6.jpg', alt: 'Haircut gallery image 6' }
+];
+
+const gallerySlides = [];
+for (let i = 0; i < galleryImages.length; i += 3) {
+    gallerySlides.push(galleryImages.slice(i, i + 3));
+}
+---
+
+<section id="services" class="min-h-screen px-6 py-24 lg:px-20 2xl:px-30 flex items-center">
+    <div class="mx-auto w-full max-w-7xl">
+        <h2 class="font-playfair font-semibold text-3xl sm:text-4xl text-white mb-8">
+            SERVICES
+        </h2>
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
+            <ServicesTable
+                heading="CUTS"
+                items={[
+                    { label: 'Classic cut', cost: '$ 800' },
+                    { label: 'Modern cut', cost: '$ 1,000' },
+                    { label: 'Fade and blend', cost: '$ 900' },
+                    { label: 'Line design', cost: '$ 600' }
+                ]}
+            />
+
+            <ServicesTable
+                heading="BEARD"
+                items={[
+                    { label: 'Beard trim', cost: '$ 500' },
+                    { label: 'Beard styling', cost: '$ 700' },
+                    { label: 'Traditional shave', cost: '$ 800' }
+                ]}
+            />
+
+            <ServicesTable
+                heading="EXTRAS AND COMBOS"
+                items={[
+                    { label: 'Hair coloring', cost: '$ 1,500' },
+                    { label: 'Hair treatment', cost: '$ 1,200' },
+                    { label: 'Scalp massage', cost: '$ 400' },
+                    { label: 'Eyebrow trim', cost: '$ 300' }
+                ]}
+            />
+        </div>
+    </div>
+</section>
+
+<section class="min-h-screen px-6 py-24 lg:px-20 2xl:px-30 flex items-center">
+    <div class="mx-auto w-full max-w-7xl">
+        <h3 class="font-playfair font-semibold text-3xl sm:text-4xl text-white mb-8">
+            WORK GALLERY
+        </h3>
+
+        <div class="relative" data-gallery-carousel>
+            <div class="overflow-hidden border border-[#2f2f2f] bg-black/20 p-4 sm:p-5">
+                <div id="gallery-track" class="flex transition-transform duration-500 ease-out">
+                    {gallerySlides.map((slide) => (
+                        <div class="min-w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {slide.map((image) => (
+                                <div class="overflow-hidden">
+                                    <img
+                                        src={image.src}
+                                        alt={image.alt}
+                                        class="w-full h-56 sm:h-64 lg:h-80 object-cover grayscale transition duration-300 hover:scale-105 hover:grayscale-0"
+                                        loading="lazy"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div class="mt-5 flex items-center justify-between gap-4">
+                <button id="gallery-prev" class="flex items-center gap-2 px-4 py-2 border border-[#3f3f3f] text-gray-300 hover:text-white hover:border-[#666] transition" aria-label="Previous gallery slide">
+                    <ChevronsLeft class="w-5 h-5" />
+                    Prev
+                </button>
+
+                <div id="gallery-dots" class="flex items-center gap-2" aria-label="Gallery slide indicators"></div>
+
+                <button id="gallery-next" class="flex items-center gap-2 px-4 py-2 border border-[#3f3f3f] text-gray-300 hover:text-white hover:border-[#666] transition" aria-label="Next gallery slide">
+                    Next
+                    <ChevronsRight class="w-5 h-5" />
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="../scripts/services-carousel.ts"></script>
