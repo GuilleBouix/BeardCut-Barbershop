@@ -11,9 +11,10 @@
 
 @font-face {
   font-family: "Playfair";
-  src: url("/fonts/PlayfairDisplay-VariableFont_wght.ttf");
+  src: url("/fonts/PlayfairDisplay-VariableFont_wght.ttf") format("truetype");
   font-weight: 100 900;
   font-style: normal;
+  font-display: swap;
 }
 
 /* Aplicarla globalmente */
@@ -33,8 +34,8 @@ body {
   background-position: center;
 }
 
-:root {
-  --font-playfair: "Playfair";
+@theme {
+  --font-playfair: "Playfair", serif;
   --breakpoint-2xs: 30rem;
   --breakpoint-1xs: 20rem;
 }

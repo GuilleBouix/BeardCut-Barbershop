@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AppointmentsPanel from '../components/appointments/AppointmentsPanel';
+import Navbar from '../components/ui/Navbar.astro';
+import Footer from '../components/ui/Footer.astro';
+---
+
+<Layout title="Appointments | BeardCut" description="Book your appointment at BeardCut.">
+    <Navbar />
+    <AppointmentsPanel client:load />
+    <Footer />
+</Layout>

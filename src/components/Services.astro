@@ -1,6 +1,6 @@
 ﻿---
-import ServicesTable from './ui/ServicesTable.astro';
 import { ChevronsRight, ChevronsLeft } from '@lucide/astro';
+import ServicesList from './services/ServicesList';
 
 const galleryImages = [
     { src: '/images/gallery-1.jpg', alt: 'Haircut gallery image 1' },
@@ -23,36 +23,7 @@ for (let i = 0; i < galleryImages.length; i += 3) {
             SERVICES
         </h2>
 
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
-            <ServicesTable
-                heading="CUTS"
-                items={[
-                    { label: 'Classic cut', cost: '$ 800' },
-                    { label: 'Modern cut', cost: '$ 1,000' },
-                    { label: 'Fade and blend', cost: '$ 900' },
-                    { label: 'Line design', cost: '$ 600' }
-                ]}
-            />
-
-            <ServicesTable
-                heading="BEARD"
-                items={[
-                    { label: 'Beard trim', cost: '$ 500' },
-                    { label: 'Beard styling', cost: '$ 700' },
-                    { label: 'Traditional shave', cost: '$ 800' }
-                ]}
-            />
-
-            <ServicesTable
-                heading="EXTRAS AND COMBOS"
-                items={[
-                    { label: 'Hair coloring', cost: '$ 1,500' },
-                    { label: 'Hair treatment', cost: '$ 1,200' },
-                    { label: 'Scalp massage', cost: '$ 400' },
-                    { label: 'Eyebrow trim', cost: '$ 300' }
-                ]}
-            />
-        </div>
+        <ServicesList client:load />
     </div>
 </section>
 
