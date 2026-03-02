@@ -3,8 +3,8 @@ import { Menu, X } from '@lucide/astro';
 ---
 
 <!-- Navbar -->
-<header class="fixed top-0 left-0 w-full p-5 z-50 backdrop-blur-xl flex items-center justify-center max-md:justify-between">
-    <img src="/images/icon.png" class="hidden w-10 max-md:block">
+<header id="site-navbar" class="site-navbar fixed top-0 left-0 z-50 flex w-full items-center justify-center px-5 py-5 transition-all duration-300 max-md:justify-between">
+    <img src="/images/icon.webp" class="hidden w-10 max-md:block">
 
     <!-- Menú de navegación -->
     <nav id="menu" class="flex jus items-center space-x-12 text-sm text-gray-300 font-light max-md:hidden">
@@ -41,28 +41,43 @@ import { Menu, X } from '@lucide/astro';
 </header>
 
 <!-- Menú desplegable -->
-<div id="mobile-menu" class="fixed top-17.5 left-0 w-full backdrop-blur-xl z-40 border-t border-[#3d3d3d] transition-all duration-300 ease-out md:hidden max-h-0 opacity-0 -translate-y-2 pointer-events-none overflow-hidden">
+<div id="mobile-menu" class="fixed top-16 left-0 z-40 w-full border-t border-white/10 bg-black-950/70 backdrop-blur-xl transition-all duration-300 ease-out md:hidden max-h-0 opacity-0 -translate-y-2 pointer-events-none overflow-hidden">
     <nav class="flex flex-col p-5">
-        <a class="nav-link text-gray-300 outline-none py-3 duration-300 hover:text-white" href="/#inicio">
+        <a class="nav-link text-gray-300 outline-none py-3 duration-300 hover:text-white" href="/#home">
             Home
         </a>
 
-        <a class="nav-link text-gray-300 outline-none py-3 duration-300 hover:text-white" href="/#nosotros">
+        <a class="nav-link text-gray-300 outline-none py-3 duration-300 hover:text-white" href="/#about">
             About
         </a>
 
-        <a class="nav-link text-gray-300 outline-none py-3 duration-300 hover:text-white" href="/#nosotros">
+        <a class="nav-link text-gray-300 outline-none py-3 duration-300 hover:text-white" href="/#team">
             Team
         </a>
 
-        <a class="nav-link text-gray-300 outline-none py-3 duration-300 hover:text-white" href="/#servicios">
+        <a class="nav-link text-gray-300 outline-none py-3 duration-300 hover:text-white" href="/#services">
             Services
         </a>
 
-        <a class="nav-link text-gray-300 outline-none py-3 duration-300 hover:text-white" href="/#contacto">
+        <a class="nav-link text-gray-300 outline-none py-3 duration-300 hover:text-white" href="/#contact">
             Contact
         </a>
     </nav>
 </div>
 
 <script src="../../scripts/navbar.ts"></script>
+
+<style>
+    .site-navbar {
+        background: transparent;
+        border: 1px solid transparent;
+        backdrop-filter: none;
+    }
+
+    .site-navbar.is-scrolled {
+        background: rgba(12, 12, 12, 0.72);
+        border-color: transparent;
+        border-bottom-color: rgba(255, 255, 255, 0.14);
+        backdrop-filter: blur(12px);
+    }
+</style>

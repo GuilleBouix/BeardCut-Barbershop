@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /$
+Disallow: /appointments
+Disallow: /appointments/
+Sitemap: https://beardcut.com/sitemap.xml

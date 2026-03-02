@@ -3,20 +3,85 @@ import "../global.css";
 import type { Props } from '../types/layoutProps';
 
 const {
-    title = 'BeardCut | Barbershop',
-    description = '',
-    lang = 'en'
+    title = 'BeardCut | Barbería en Oberá, Misiones - Cortes, Barbas y Estilos',
+    description = 'BeardCut Barbería en Oberá, Misiones. Cortes classics, fades, diseño de barba y servicios profesionales. Reserva tu turno ahora.',
+    lang = 'es-AR',
+    canonicalURL = Astro.url.href,
+    noIndex = false
 } = Astro.props as Props;
+
+const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "HairSalon",
+    "name": "BeardCut Barbershop",
+    "image": "https://beardcut.com/images/logo.webp",
+    "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Av. Beltrame N3360",
+        "addressLocality": "Oberá",
+        "addressRegion": "Misiones",
+        "addressCountry": "AR"
+    },
+    "telephone": "+54-9-3711-365214",
+    "email": "contact@beardcut.com",
+    "priceRange": "$$",
+    "openingHoursSpecification": [
+        {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+            "opens": "09:00",
+            "closes": "20:00"
+        },
+        {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": "Saturday",
+            "opens": "09:00",
+            "closes": "18:00"
+        }
+    ],
+    "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "-27.4905078",
+        "longitude": "-55.1075074"
+    },
+    "url": "https://beardcut.com",
+    "sameAs": []
+};
 ---
 
+<!doctype html>
 <html lang={lang}>
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" href="/favicon.ico" sizes="32x32" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="description" content={description} />
+		{noIndex ? (
+			<meta name="robots" content="noindex, nofollow" />
+		) : (
+			<link rel="canonical" href={canonicalURL} />
+		)}
+		
+		<!-- Open Graph -->
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content={canonicalURL} />
+		<meta property="og:image" content="https://beardcut.com/images/og-image.webp" />
+		<meta property="og:locale" content="es_AR" />
+		<meta property="og:site_name" content="BeardCut Barbershop" />
+		
+		<!-- Twitter Card -->
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content="https://beardcut.com/images/og-image.webp" />
+		
+		<!-- Schema.org JSON-LD -->
+		<script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
+		
 		<title>{title}</title>
 	</head>
 	<body>

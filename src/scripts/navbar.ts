@@ -6,12 +6,17 @@ const initNavbarMenu = () => {
     const mobileMenu = document.getElementById('mobile-menu');
     const menuIcon = document.getElementById('icon-menu');
     const closeIcon = document.getElementById('icon-close');
+    const navbar = document.getElementById('site-navbar');
 
     if (!menuButton || !mobileMenu || !menuIcon || !closeIcon || menuButton.dataset.ready === 'true') {
         return;
     }
 
     menuButton.dataset.ready = 'true';
+
+    const setNavbarState = () => {
+        navbar?.classList.toggle('is-scrolled', window.scrollY > 24);
+    };
 
     const setMenuState = (isOpen: boolean) => {
         mobileMenu.classList.remove(...(isOpen ? CLOSED_MENU_CLASSES : OPEN_MENU_CLASSES));
@@ -44,6 +49,9 @@ const initNavbarMenu = () => {
             setMenuState(false);
         }
     });
+
+    setNavbarState();
+    window.addEventListener('scroll', setNavbarState, { passive: true });
 };
 
 initNavbarMenu();

@@ -4,14 +4,14 @@
 /* Fuente Personalizada */
 @font-face {
   font-family: "Geist";
-  src: url("/fonts/Geist-VariableFont_wght.ttf") format("truetype");
+  src: url("/fonts/Geist-VariableFont_wght.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Playfair";
-  src: url("/fonts/PlayfairDisplay-VariableFont_wght.ttf") format("truetype");
+  src: url("/fonts/PlayfairDisplay-VariableFont_wght.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -24,14 +24,41 @@
 
 html {
   scroll-behavior: smooth;
+  scrollbar-color: #3f3f46 #09090b;
+  scrollbar-width: thin;
 }
 
 body {
-  background-image: url("/images/background-2.jpg");
+  background-image: url("/images/background-2.webp");
   background-size: cover;
-  background-attachment: fixed;
   background-repeat: no-repeat;
   background-position: center;
+  background-attachment: scroll;
+}
+
+@media (min-width: 1024px) {
+  body {
+    background-attachment: fixed;
+  }
+}
+
+/* Scrollbar global (WebKit) */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #09090b;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #3f3f46;
+  border-radius: 9999px;
+  border: 2px solid #09090b;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #52525b;
 }
 
 @theme {
