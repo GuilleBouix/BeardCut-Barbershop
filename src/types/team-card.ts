@@ -1,7 +1,7 @@
-﻿export interface TeamCardProps {
-    img: string;
-    imgWidth: number;
-    imgHeight: number;
+import type { ImageMetadata } from "astro";
+
+export interface TeamCardProps {
+    img: ImageMetadata;
     specialization: string;
     name: string;
     experience: string;

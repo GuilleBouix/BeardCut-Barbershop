@@ -14,7 +14,7 @@
   src: url("/fonts/PlayfairDisplay-VariableFont_wght.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
 }
 
 /* Aplicarla globalmente */
@@ -29,6 +29,7 @@ html {
 }
 
 body {
+  font-family: "Geist", sans-serif;
   background-image: url("/images/background-2.webp");
   background-size: cover;
   background-repeat: no-repeat;

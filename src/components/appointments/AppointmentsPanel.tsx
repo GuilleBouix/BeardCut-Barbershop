@@ -20,6 +20,7 @@ const EMPTY_FORM: BookingFormData = {
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const SLOT_INTERVAL_MIN = 30;
 const DAYS_TO_SHOW = 10;
+const DAYS_PER_PAGE = 5;
 
 const minutesToHHMM = (minutes: number) => {
   const h = Math.floor(minutes / 60)
@@ -32,6 +33,23 @@ const minutesToHHMM = (minutes: number) => {
 const timeToMinutes = (time: string) => {
   const [h, m] = time.slice(0, 5).split(":").map(Number);
   return h * 60 + m;
+};
+
+const formatRangeDate = (dateISO: string) => {
+  const parsed = new Date(`${dateISO}T00:00:00`);
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+  }).format(parsed);
+};
+
+const formatLongDate = (dateISO: string) => {
+  const parsed = new Date(`${dateISO}T00:00:00`);
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  }).format(parsed);
 };
 
 const buildDaysFromShifts = (shifts: BusinessShift[]): ScheduleDay[] => {
@@ -110,6 +128,7 @@ export default function AppointmentsPanel() {
   );
   const [selectedDayISO, setSelectedDayISO] = useState<string>("");
   const [selectedSlotId, setSelectedSlotId] = useState<string>("");
+  const [dayPage, setDayPage] = useState(0);
   const [form, setForm] = useState<BookingFormData>(EMPTY_FORM);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
@@ -186,6 +205,38 @@ export default function AppointmentsPanel() {
     [services, selectedServiceId],
   );
 
+  const maxDayPage = useMemo(
+    () => Math.max(0, Math.ceil(days.length / DAYS_PER_PAGE) - 1),
+    [days.length],
+  );
+
+  const visibleDays = useMemo(() => {
+    const start = dayPage * DAYS_PER_PAGE;
+    return days.slice(start, start + DAYS_PER_PAGE);
+  }, [dayPage, days]);
+
+  useEffect(() => {
+    if (days.length === 0 || !selectedDayISO) {
+      return;
+    }
+
+    const index = days.findIndex((day) => day.dateISO === selectedDayISO);
+    if (index === -1) {
+      return;
+    }
+
+    const nextPage = Math.floor(index / DAYS_PER_PAGE);
+    if (nextPage !== dayPage) {
+      setDayPage(nextPage);
+    }
+  }, [days, selectedDayISO, dayPage]);
+
+  useEffect(() => {
+    if (dayPage > maxDayPage) {
+      setDayPage(maxDayPage);
+    }
+  }, [dayPage, maxDayPage]);
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setErrorMessage("");
@@ -218,191 +269,314 @@ export default function AppointmentsPanel() {
   };
 
   return (
-    <section className="min-h-screen px-6 py-20 lg:px-20 2xl:px-30 flex items-center">
-      <div className="mx-auto w-full max-w-7xl">
-        <header className="mb-8">
-          <p className="text-sm tracking-[0.2em] uppercase text-[#9a9a9a]">
-            Booking Panel
-          </p>
-          <h1 className="font-playfair text-2xl sm:text-4xl text-white mt-2">
+    <section className="min-h-screen flex flex-col items-center justify-center py-16 px-3 sm:px-5 lg:px-8">
+      <div className="w-full max-w-5xl mx-auto">
+        <header className="mb-5 sm:mb-6">
+          <h1 className="font-playfair text-2xl sm:text-3xl text-white mt-2">
             BOOK AN APPOINTMENT
           </h1>
-          <p className="text-[#9d9d9d] mt-3">
-            Services and schedule are loaded from Supabase.
+          <p className="text-sm sm:text-md text-[#9d9d9d] mt-2">
+            Choose a date and time first, then confirm your details.
           </p>
         </header>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <div className="xl:col-span-2 border border-[#2f2f2f] bg-black/30 p-5 sm:p-7">
-            <h2 className="text-white text-2xl font-semibold">
-              1. Choose a Service
-            </h2>
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {services.map((service) => {
-                const isSelected = selectedServiceId === service.id;
-                return (
-                  <button
-                    key={service.id}
-                    type="button"
-                    onClick={() => setSelectedServiceId(service.id)}
-                    className={[
-                      "text-left border p-4 transition cursor-pointer",
-                      isSelected
-                        ? "border-white bg-black/40"
-                        : "border-[#3a3a3a] bg-black/20 hover:border-[#707070]",
-                    ].join(" ")}
-                  >
-                    <p className="text-white font-medium">{service.name}</p>
-                    <p className="text-[#9d9d9d] text-sm mt-1">
-                      {service.durationMin} min
-                    </p>
-                    <p className="text-[#d6d6d6] text-sm mt-2">
-                      ${service.price}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
+        <div className="bg-[#101010] border border-[#3d3d3d] text-[#8f8f8f] p-3 sm:p-5 lg:p-6">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8">
+            <div className="space-y-6">
+              <section>
+                <h2 className="text-lg font-semibold text-white mb-4 sm:text-lg">
+                  1) Choose a date
+                </h2>
 
-            <h2 className="text-white text-2xl font-semibold mt-8">
-              2. Choose Date and Time
-            </h2>
-
-            {isLoading ? (
-              <p className="mt-4 text-[#9d9d9d]">Loading available shifts...</p>
-            ) : (
-              <>
-                {days.length === 0 && (
-                  <p className="mt-4 text-[#9d9d9d]">
+                {isLoading ? (
+                  <p className="text-[#9d9d9d]">Loading available shifts...</p>
+                ) : days.length === 0 ? (
+                  <p className="text-[#9d9d9d]">
                     No available shifts found. Verify `business_shifts` data and
                     RLS `select` policy.
                   </p>
-                )}
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {days.map((day) => {
-                    const isSelected = selectedDayISO === day.dateISO;
-                    return (
+                ) : (
+                  <>
+                    <div className="flex justify-between items-center mb-4 bg-[#1a1a1a] p-2 sm:p-3 border border-[#3d3d3d] gap-2">
                       <button
-                        key={day.dateISO}
                         type="button"
-                        onClick={() => {
-                          setSelectedDayISO(day.dateISO);
-                          setSelectedSlotId("");
-                        }}
-                        className={[
-                          "px-4 py-2 border text-sm transition cursor-pointer",
-                          isSelected
-                            ? "border-white text-white"
-                            : "border-[#3a3a3a] text-[#b5b5b5] hover:border-[#707070]",
-                        ].join(" ")}
-                      >
-                        {day.label}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <h3 className="mt-4 text-white text-xl font-semibold">Hours</h3>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {selectedDay?.slots.map((slot) => {
-                    const isSelected = selectedSlotId === slot.id;
-                    return (
-                      <button
-                        key={slot.id}
-                        type="button"
-                        disabled={!slot.available}
                         onClick={() =>
-                          slot.available && setSelectedSlotId(slot.id)
+                          setDayPage((prev) => Math.max(0, prev - 1))
                         }
-                        className={[
-                          "px-3 py-2 text-sm border transition cursor-pointer",
-                          !slot.available
-                            ? "border-[#2a2a2a] text-[#666] cursor-not-allowed"
-                            : isSelected
-                              ? "border-white text-white bg-black/40"
-                              : "border-[#505050] text-[#d0d0d0] hover:border-white",
-                        ].join(" ")}
+                        disabled={dayPage === 0}
+                        className="flex items-center text-white border border-[#3d3d3d] px-2.5 py-1.5 text-sm cursor-pointer hover:bg-white hover:text-black transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                       >
-                        {slot.time}
+                        Prev
                       </button>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-          </div>
 
-          <aside className="border border-[#2f2f2f] bg-black/30 p-5 sm:p-7 h-fit">
-            <h2 className="text-white text-2xl font-semibold">
-              3. Your Details
-            </h2>
-            <p className="text-[#9d9d9d] text-sm mt-2">
-              Name, email and phone are required.
-            </p>
+                      <span className="text-white font-medium text-center text-sm sm:text-base">
+                        {visibleDays.length > 0
+                          ? `${formatRangeDate(visibleDays[0].dateISO)} - ${formatRangeDate(visibleDays[visibleDays.length - 1].dateISO)}`
+                          : "No dates"}
+                      </span>
 
-            <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
-              <input
-                type="text"
-                placeholder="Full name"
-                value={form.name}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, name: event.target.value }))
-                }
-                className="w-full border border-[#3a3a3a] bg-black/25 px-3 py-2 text-white outline-none focus:border-white transition-colors "
-              />
-              <input
-                type="email"
-                placeholder="Email"
-                value={form.email}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, email: event.target.value }))
-                }
-                className="w-full border border-[#3a3a3a] bg-black/25 px-3 py-2 text-white outline-none focus:border-white transition-colors "
-              />
-              <input
-                type="tel"
-                placeholder="Phone"
-                value={form.phone}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, phone: event.target.value }))
-                }
-                className="w-full border border-[#3a3a3a] bg-black/25 px-3 py-2 text-white outline-none focus:border-white transition-colors "
-              />
-              <textarea
-                placeholder="Notes (optional)"
-                value={form.notes}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, notes: event.target.value }))
-                }
-                className="w-full min-h-24 border border-[#3a3a3a] bg-black/25 px-3 py-2 text-white outline-none focus:border-white resize-y"
-              />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setDayPage((prev) => Math.min(maxDayPage, prev + 1))
+                        }
+                        disabled={dayPage >= maxDayPage}
+                        className="flex items-center text-white border border-[#3d3d3d] px-2.5 py-1.5 text-sm cursor-pointer hover:bg-white hover:text-black transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        Next
+                      </button>
+                    </div>
 
-              <button
-                type="submit"
-                className="w-full border border-white px-4 py-3 text-white hover:bg-white hover:text-black transition-colors cursor-pointer"
-              >
-                Reserve Appointment
-              </button>
-            </form>
+                    <div className="mb-4">
+                      <h3 className="text-[#8f8f8f] mb-2 text-sm sm:text-base">
+                        Available days:
+                      </h3>
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-5">
+                        {visibleDays.map((day) => {
+                          const isSelected = selectedDayISO === day.dateISO;
+                          return (
+                            <button
+                              key={day.dateISO}
+                              type="button"
+                              onClick={() => {
+                                setSelectedDayISO(day.dateISO);
+                                setSelectedSlotId("");
+                              }}
+                              className={[
+                                "py-2 px-2 text-center text-sm border transition-all cursor-pointer",
+                                isSelected
+                                  ? "bg-white text-black border-white font-bold"
+                                  : "bg-[#101010] border-[#3d3d3d] text-white hover:bg-white hover:text-black",
+                              ].join(" ")}
+                            >
+                              {day.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
 
-            <div className="mt-4 text-sm">
-              {selectedService && selectedDayISO && selectedSlotId ? (
-                <p className="text-[#c8c8c8]">
-                  Selected: {selectedService.name} on {selectedDayISO} at{" "}
-                  {selectedSlotId}
-                </p>
-              ) : (
-                <p className="text-[#8e8e8e]">No appointment selected yet.</p>
-              )}
+                    <div className="bg-[#1a1a1a] p-2.5 sm:p-3 border border-[#3d3d3d] text-sm sm:text-base">
+                      <span className="text-[#8f8f8f]">Selected day: </span>
+                      <span className="text-white font-medium">
+                        {selectedDay
+                          ? formatLongDate(selectedDay.dateISO)
+                          : "None"}
+                      </span>
+                    </div>
+                  </>
+                )}
+              </section>
+
+              <section>
+                <h2 className="text-lg font-semibold text-white mb-4 sm:text-lg">
+                  2) Available times
+                </h2>
+
+                {!selectedDay || selectedDay.slots.length === 0 ? (
+                  <p className="text-[#9d9d9d]">
+                    Select a day to view available time slots.
+                  </p>
+                ) : (
+                  <div className="bg-[#1a1a1a] border border-[#3d3d3d] overflow-hidden">
+                    <div className="bg-[#101010] p-3 text-center border-b border-[#3d3d3d]">
+                      <h3 className="text-white font-medium">
+                        Morning & Afternoon
+                      </h3>
+                    </div>
+
+                    <div className="p-2.5 sm:p-3 h-64 sm:h-72 overflow-y-auto space-y-2">
+                      {selectedDay.slots.map((slot) => {
+                        const isSelected = selectedSlotId === slot.id;
+
+                        return (
+                          <div
+                            key={slot.id}
+                            className={[
+                              "flex justify-between items-center py-2 border-b border-[#3d3d3d] flex-col sm:flex-row gap-2 sm:gap-0",
+                              isSelected ? "bg-white/5 px-2" : "",
+                              !slot.available ? "opacity-50" : "",
+                            ].join(" ")}
+                          >
+                            <span className="text-white font-mono">
+                              {slot.time}
+                            </span>
+
+                            {!slot.available ? (
+                              <span className="text-[#8f8f8f] px-3 py-1 text-sm">
+                                Occupied
+                              </span>
+                            ) : isSelected ? (
+                              <button
+                                type="button"
+                                onClick={() => setSelectedSlotId(slot.id)}
+                                className="bg-white text-black border border-white px-3 py-1 text-xs sm:text-sm uppercase font-bold cursor-pointer"
+                              >
+                                Selected
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => setSelectedSlotId(slot.id)}
+                                className="text-white border border-white px-3 py-1 hover:bg-white hover:text-black transition-all text-xs sm:text-sm uppercase font-semibold cursor-pointer"
+                              >
+                                Reserve
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </section>
             </div>
 
-            {errorMessage && (
-              <p className="mt-4 text-sm text-red-400">{errorMessage}</p>
-            )}
-            {successMessage && (
-              <p className="mt-4 text-sm text-green-400">{successMessage}</p>
-            )}
-          </aside>
+            <aside className="space-y-6">
+              <section>
+                <h2 className="text-base font-semibold text-white mb-3 sm:text-lg">
+                  3) Confirm your details
+                </h2>
+
+                <form className="space-y-4" onSubmit={handleSubmit}>
+                  <div>
+                    <label
+                      htmlFor="appointment-name"
+                      className="block text-[#8f8f8f] mb-1.5 text-sm"
+                    >
+                      Full Name:
+                    </label>
+                    <input
+                      id="appointment-name"
+                      type="text"
+                      value={form.name}
+                      onChange={(event) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          name: event.target.value,
+                        }))
+                      }
+                      className="w-full bg-[#1a1a1a] border border-[#3d3d3d] text-white text-sm p-2 sm:p-2.5 focus:outline-none focus:border-white transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="appointment-email"
+                      className="block text-[#8f8f8f] mb-1.5 text-sm"
+                    >
+                      Email:
+                    </label>
+                    <input
+                      id="appointment-email"
+                      type="email"
+                      value={form.email}
+                      onChange={(event) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          email: event.target.value,
+                        }))
+                      }
+                      className="w-full bg-[#1a1a1a] border border-[#3d3d3d] text-white text-sm p-2 sm:p-2.5 focus:outline-none focus:border-white transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="appointment-phone"
+                      className="block text-[#8f8f8f] mb-1.5 text-sm"
+                    >
+                      Phone:
+                    </label>
+                    <input
+                      id="appointment-phone"
+                      type="tel"
+                      value={form.phone}
+                      onChange={(event) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          phone: event.target.value,
+                        }))
+                      }
+                      className="w-full bg-[#1a1a1a] border border-[#3d3d3d] text-white text-sm p-2 sm:p-2.5 focus:outline-none focus:border-white transition-all"
+                      placeholder="+1 555 123 4567"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="appointment-service"
+                      className="block text-[#8f8f8f] mb-1.5 text-sm"
+                    >
+                      Service:
+                    </label>
+                    <select
+                      id="appointment-service"
+                      value={selectedServiceId}
+                      onChange={(event) =>
+                        setSelectedServiceId(event.target.value)
+                      }
+                      className="w-full bg-[#1a1a1a] border border-[#3d3d3d] text-white text-sm p-2 sm:p-2.5 focus:outline-none focus:border-white transition-all"
+                    >
+                      {services.map((service) => (
+                        <option key={service.id} value={service.id}>
+                          {service.name} - ${service.price}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="appointment-notes"
+                      className="block text-[#8f8f8f] mb-1.5 text-sm"
+                    >
+                      Notes (optional):
+                    </label>
+                    <textarea
+                      id="appointment-notes"
+                      value={form.notes}
+                      onChange={(event) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          notes: event.target.value,
+                        }))
+                      }
+                      className="w-full min-h-18 bg-[#1a1a1a] border border-[#3d3d3d] text-white text-sm p-2 sm:p-2.5 focus:outline-none focus:border-white transition-all resize-y"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full bg-white text-black px-4 py-2.5 mt-2 hover:bg-gray-200 transition-colors border border-white font-bold uppercase tracking-widest cursor-pointer text-xs sm:text-sm"
+                  >
+                    Confirm Appointment
+                  </button>
+                </form>
+
+                <div className="mt-4 text-sm">
+                  {selectedDayISO && selectedSlotId ? (
+                    <div className="p-3 text-sm sm:text-base bg-green-900/30 text-green-400 border border-green-900">
+                      Selected time: {selectedSlotId} on {selectedDayISO}
+                    </div>
+                  ) : (
+                    <p className="text-[#8e8e8e]">
+                      No appointment selected yet.
+                    </p>
+                  )}
+                </div>
+
+                {errorMessage && (
+                  <p className="mt-4 text-sm text-red-400">{errorMessage}</p>
+                )}
+                {successMessage && (
+                  <p className="mt-4 text-sm text-green-400">
+                    {successMessage}
+                  </p>
+                )}
+              </section>
+            </aside>
+          </div>
         </div>
       </div>
     </section>

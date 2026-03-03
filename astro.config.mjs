@@ -6,6 +6,12 @@ import react from "@astrojs/react";
 
 // https://astro.build/config
 export default defineConfig({
+  site: "https://beardcut.vercel.app",
+
+  build: {
+    inlineStylesheets: "always",
+  },
+
   devToolbar: {
     enabled: false,
   },

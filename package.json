@@ -20,5 +20,8 @@
     "react-dom": "^19.2.4",
     "tailwindcss": "^4.2.1",
     "tailwindcss-animated": "^2.0.0"
+  },
+  "devDependencies": {
+    "sharp": "^0.34.5"
   }
 }

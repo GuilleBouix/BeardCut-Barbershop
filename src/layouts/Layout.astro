@@ -6,20 +6,23 @@ const {
     title = 'BeardCut | Barbershop',
     description = 'BeardCut Barbershop in Austin, Texas. Classic cuts, fades, beard design and premium grooming services. Book your appointment now.',
     lang = 'en-US',
-    canonicalURL = Astro.url.href,
+    canonicalURL,
     noIndex = false
 } = Astro.props as Props;
+
+const resolvedCanonicalURL = canonicalURL ?? new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
 
 const schemaData = {
     "@context": "https://schema.org",
     "@type": "HairSalon",
     "name": "BeardCut Barbershop",
-    "image": "https://beardcut.com/images/logo.webp",
+    "image": "https://beardcut.vercel.app/images/logo.webp",
     "address": {
         "@type": "PostalAddress",
-        "streetAddress": "200 Congress Ave",
+        "streetAddress": "412 Congress Ave",
         "addressLocality": "Austin",
-        "addressRegion": "Texas",
+        "addressRegion": "TX",
+        "postalCode": "78701",
         "addressCountry": "US"
     },
     "telephone": "+1-512-555-0148",
@@ -44,7 +47,7 @@ const schemaData = {
         "latitude": "30.2672",
         "longitude": "-97.7431"
     },
-    "url": "https://beardcut.com",
+    "url": "https://beardcut.vercel.app",
     "sameAs": []
 };
 ---
@@ -54,22 +57,22 @@ const schemaData = {
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" sizes="32x32" />
+		<link rel="icon" href="/images/favicon.ico" sizes="32x32" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="description" content={description} />
 		{noIndex ? (
 			<meta name="robots" content="noindex, nofollow" />
 		) : (
-			<link rel="canonical" href={canonicalURL} />
+			<link rel="canonical" href={resolvedCanonicalURL} />
 		)}
 		
 		<!-- Open Graph -->
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content={canonicalURL} />
-		<meta property="og:image" content="https://beardcut.com/images/og-image.webp" />
+		<meta property="og:url" content={resolvedCanonicalURL} />
+		<meta property="og:image" content="https://beardcut.vercel.app/images/og-image.jpg" />
 		<meta property="og:locale" content="en_US" />
 		<meta property="og:site_name" content="BeardCut Barbershop" />
 		
@@ -77,7 +80,7 @@ const schemaData = {
 		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="twitter:title" content={title} />
 		<meta name="twitter:description" content={description} />
-		<meta name="twitter:image" content="https://beardcut.com/images/og-image.webp" />
+		<meta name="twitter:image" content="https://beardcut.vercel.app/images/og-image.jpg" />
 		
 		<!-- Schema.org JSON-LD -->
 		<script type="application/ld+json" set:html={JSON.stringify(schemaData)} />

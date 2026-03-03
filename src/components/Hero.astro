@@ -1,4 +1,8 @@
-﻿<section id="home" class="relative min-h-screen px-6 py-24 lg:px-20 2xl:px-30 flex items-center justify-center">
+---
+import { Image } from "astro:assets";
+import logoImage from "../assets/images/logo.webp";
+---
+<section id="home" class="relative min-h-screen px-6 py-24 lg:px-20 2xl:px-30 flex items-center justify-center">
     <!-- Social links: fixed on desktop, centered on mobile -->
     <div class="social-container fixed left-4 top-1/2 -translate-y-1/2 z-20 hidden xl:flex flex-col gap-4">
         <a href="#" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/25 text-white/70 opacity-80 transition hover:scale-110 hover:opacity-100 hover:border-white hover:bg-white hover:text-black" aria-label="Instagram">
@@ -21,12 +25,14 @@
     </div>
 
     <div class="mx-auto w-full max-w-5xl flex flex-col items-center justify-center text-center gap-8 sm:gap-10">
-        <img
-            src="/images/logo.webp"
-            width="1798"
-            height="510"
+        <Image
+            src={logoImage}
+            widths={[360, 560, 728, 900]}
+            sizes="(max-width: 640px) 92vw, (max-width: 1024px) 70vw, 768px"
             fetchpriority="high"
-            decoding="async"
+            loading="eager"
+            decoding="sync"
+            quality={60}
             alt="BeardCut Logo"
             class="w-md sm:w-md md:w-lg lg:w-xl h-auto"
         />
@@ -56,3 +62,4 @@
         </div>
     </div>
 </section>
+

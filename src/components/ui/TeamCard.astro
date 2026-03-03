@@ -1,17 +1,21 @@
-﻿---
-import type { TeamCardProps } from '../../types/team-card';
+---
+import { Image } from "astro:assets";
+import type { TeamCardProps } from "../../types/team-card";
 
-const { img, imgWidth, imgHeight, specialization, name, experience } = Astro.props as TeamCardProps;
+const { img, specialization, name, experience } = Astro.props as TeamCardProps;
 ---
 
 <article class="group w-full rounded-sm border border-[#2f2f2f] bg-black/30 p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#4a4a4a] hover:bg-black/40">
-    <img
+    <Image
         src={img}
-        width={imgWidth}
-        height={imgHeight}
+        alt={`${name} - ${specialization} at BeardCut in Austin, Texas`}
+        widths={[280, 330, 420, 500]}
+        sizes="(max-width: 640px) 330px, (max-width: 1280px) 44vw, 330px"
         loading="lazy"
         decoding="async"
-        alt={`${name} - ${specialization} at BeardCut in Austin, Texas`}
+        fetchpriority="low"
+        format="avif"
+        quality={50}
         class="w-full h-72 sm:h-80 lg:h-72 xl:h-80 object-cover rounded-xs mb-4 grayscale transition duration-300 group-hover:grayscale-0"
     />
 

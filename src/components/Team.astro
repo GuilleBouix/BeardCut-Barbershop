@@ -1,5 +1,8 @@
-﻿---
-import TeamCard from './ui/TeamCard.astro';
+---
+import TeamCard from "./ui/TeamCard.astro";
+import barberOne from "../assets/images/barber-1.webp";
+import barberTwo from "../assets/images/barber-2.webp";
+import barberThree from "../assets/images/barber-3.webp";
 ---
 
 <section id="team" class="min-h-screen px-6 py-24 lg:px-20 2xl:px-30 flex items-center">
@@ -10,27 +13,21 @@ import TeamCard from './ui/TeamCard.astro';
 
         <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
             <TeamCard
-                img="/images/barber-1.webp"
-                imgWidth={2048}
-                imgHeight={2048}
+                img={barberOne}
                 specialization="SENIOR BARBER STYLIST"
                 name="John Doe"
                 experience="Classic cuts and timeless styles."
             />
 
             <TeamCard
-                img="/images/barber-2.webp"
-                imgWidth={500}
-                imgHeight={500}
+                img={barberTwo}
                 specialization="BEARD SPECIALIST"
                 name="Michael Shawn"
                 experience="Precision beard sculpting and detailing."
             />
 
             <TeamCard
-                img="/images/barber-3.webp"
-                imgWidth={626}
-                imgHeight={626}
+                img={barberThree}
                 specialization="FADE EXPERT"
                 name="Marco Silva"
                 experience="Modern fades and clean blends."

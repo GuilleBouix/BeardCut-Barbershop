@@ -1,17 +1,21 @@
-﻿---
-import { Menu, X } from '@lucide/astro';
+---
+import { Menu, X } from "@lucide/astro";
+import { Image } from "astro:assets";
+import iconImage from "../../assets/images/icon.webp";
 ---
 
 <!-- Navbar -->
 <header id="site-navbar" class="site-navbar fixed top-0 left-0 z-50 flex w-full items-center justify-center px-5 py-5 transition-all duration-300 max-md:justify-between">
-    <img
-        src="/images/icon.webp"
-        width="838"
-        height="578"
-        decoding="async"
+    <Image
+        src={iconImage}
         alt="BeardCut icon"
+        widths={[40, 80]}
+        sizes="40px"
+        loading="eager"
+        decoding="async"
+        quality={68}
         class="hidden w-10 max-md:block"
-    >
+    />
 
     <!-- Navigation menu -->
     <nav id="menu" class="flex jus items-center space-x-12 text-sm text-gray-300 font-light max-md:hidden">

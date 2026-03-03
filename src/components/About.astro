@@ -1,4 +1,8 @@
-﻿<section id="about" class="min-h-screen px-6 py-24 lg:px-20 2xl:px-30 flex items-center">
+---
+import { Image } from "astro:assets";
+import aboutImage from "../assets/images/about.webp";
+---
+<section id="about" class="min-h-screen px-6 py-24 lg:px-20 2xl:px-30 flex items-center">
     <article class="mx-auto w-full max-w-7xl grid grid-cols-1 xl:grid-cols-2 gap-10 xl:gap-16 items-center">
         <div class="max-w-2xl">
             <h1 class="font-playfair section-title font-semibold text-white text-3xl sm:text-4xl mb-6">
@@ -12,15 +16,19 @@
             </p>
         </div>
 
-        <img
-            src="/images/about.webp"
-            width="850"
-            height="567"
+        <Image
+            src={aboutImage}
+            alt="BeardCut barber performing a haircut in Austin, Texas"
+            widths={[320, 420, 520, 640, 728]}
+            sizes="(max-width: 768px) 92vw, (max-width: 1280px) 50vw, 640px"
             loading="lazy"
             decoding="async"
+            fetchpriority="low"
+            format="avif"
+            quality={45}
             style="filter: saturate(0);"
-            alt="BeardCut barber performing a haircut in Austin, Texas"
             class="w-full max-w-2xl xl:ml-auto rounded-sm shadow-xl opacity-75 object-cover h-80 sm:h-105 lg:h-130"
         />
     </article>
 </section>
+
