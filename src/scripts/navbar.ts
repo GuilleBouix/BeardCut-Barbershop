@@ -1,4 +1,4 @@
-const OPEN_MENU_CLASSES = ['max-h-80', 'opacity-100', 'translate-y-0', 'pointer-events-auto'] as const;
+﻿const OPEN_MENU_CLASSES = ['max-h-80', 'opacity-100', 'translate-y-0', 'pointer-events-auto'] as const;
 const CLOSED_MENU_CLASSES = ['max-h-0', 'opacity-0', '-translate-y-2', 'pointer-events-none'] as const;
 
 const initNavbarMenu = () => {
@@ -8,30 +8,56 @@ const initNavbarMenu = () => {
     const closeIcon = document.getElementById('icon-close');
     const navbar = document.getElementById('site-navbar');
 
-    if (!menuButton || !mobileMenu || !menuIcon || !closeIcon || menuButton.dataset.ready === 'true') {
+    if (!menuButton || !mobileMenu || !menuIcon || !closeIcon || !navbar || menuButton.dataset.ready === 'true') {
         return;
     }
 
     menuButton.dataset.ready = 'true';
 
-    const setNavbarState = () => {
-        navbar?.classList.toggle('is-scrolled', window.scrollY > 24);
+    let isMenuOpen: boolean | null = null;
+    let isScrolled = false;
+    let scrollFrameRequested = false;
+
+    const setNavbarState = (nextState: boolean) => {
+        if (nextState === isScrolled) {
+            return;
+        }
+
+        isScrolled = nextState;
+        navbar.classList.toggle('is-scrolled', nextState);
     };
 
-    const setMenuState = (isOpen: boolean) => {
-        mobileMenu.classList.remove(...(isOpen ? CLOSED_MENU_CLASSES : OPEN_MENU_CLASSES));
-        mobileMenu.classList.add(...(isOpen ? OPEN_MENU_CLASSES : CLOSED_MENU_CLASSES));
-        menuIcon.classList.toggle('hidden', isOpen);
-        closeIcon.classList.toggle('hidden', !isOpen);
-        menuButton.setAttribute('aria-expanded', String(isOpen));
-        menuButton.setAttribute('aria-label', isOpen ? 'Cerrar menú' : 'Abrir menú');
+    const setMenuState = (nextState: boolean) => {
+        if (isMenuOpen === nextState) {
+            return;
+        }
+
+        isMenuOpen = nextState;
+        mobileMenu.classList.remove(...(nextState ? CLOSED_MENU_CLASSES : OPEN_MENU_CLASSES));
+        mobileMenu.classList.add(...(nextState ? OPEN_MENU_CLASSES : CLOSED_MENU_CLASSES));
+        menuIcon.classList.toggle('hidden', nextState);
+        closeIcon.classList.toggle('hidden', !nextState);
+        menuButton.setAttribute('aria-expanded', String(nextState));
+        menuButton.setAttribute('aria-label', nextState ? 'Close menu' : 'Open menu');
+    };
+
+    const handleScroll = () => {
+        if (scrollFrameRequested) {
+            return;
+        }
+
+        scrollFrameRequested = true;
+        window.requestAnimationFrame(() => {
+            scrollFrameRequested = false;
+            setNavbarState(window.scrollY > 24);
+        });
     };
 
     setMenuState(false);
+    setNavbarState(window.scrollY > 24);
 
     menuButton.addEventListener('click', () => {
-        const isOpen = menuButton.getAttribute('aria-expanded') === 'true';
-        setMenuState(!isOpen);
+        setMenuState(!(isMenuOpen ?? false));
     });
 
     mobileMenu.querySelectorAll('a').forEach((link) => {
@@ -50,8 +76,7 @@ const initNavbarMenu = () => {
         }
     });
 
-    setNavbarState();
-    window.addEventListener('scroll', setNavbarState, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
 };
 
 initNavbarMenu();

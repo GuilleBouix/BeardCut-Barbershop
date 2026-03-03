@@ -7,7 +7,7 @@ import ContactInfoItem from './ui/ContactInfoItem.astro';
     <div class="mx-auto w-full max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-stretch">
         <article class="border border-[#2f2f2f] bg-black/30 p-6 sm:p-8 lg:p-10 flex flex-col justify-between">
             <div>
-                <h2 class="font-playfair font-semibold text-3xl sm:text-4xl text-white mb-5">
+                <h2 class="font-playfair section-title font-semibold text-3xl sm:text-4xl text-white mb-5">
                     CONTACT
                 </h2>
 
@@ -22,14 +22,14 @@ import ContactInfoItem from './ui/ContactInfoItem.astro';
                 <div>
                     <ContactInfoItem
                         heading="Address"
-                        value="Av. Beltrame N3360, Oberá, Misiones"
+                        value="412 Congress Ave, Austin, TX 78701"
                     >
                         <MapPin slot="icon" size={18} />
                     </ContactInfoItem>
 
                     <ContactInfoItem
                         heading="Phone"
-                        value="+54 9 3711-365214"
+                        value="+1 (512) 555-0148"
                     >
                         <Phone slot="icon" size={18} />
                     </ContactInfoItem>
@@ -48,13 +48,13 @@ import ContactInfoItem from './ui/ContactInfoItem.astro';
                     Book Online
                 </a>
 
-                <span class="text-xs sm:text-sm text-[#8f8f8f]">Lun - Sáb: 09:00 - 20:00</span>
+                <span class="text-xs sm:text-sm text-[#8f8f8f]">Mon - Sat: 09:00 - 20:00</span>
             </div>
         </article>
 
         <div class="border border-[#2f2f2f] bg-black/20 p-2 sm:p-3 lg:p-4 h-full">
             <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3539.3172363814338!2d-55.107507525313714!3d-27.490507817591695!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94f8f51736c0d97d%3A0x29975b8967eb0de0!2sAv.%20Beltrame%2C%20N3360%20Ober%C3%A1%2C%20Misiones!5e0!3m2!1ses!2sar!4v1763651701976!5m2!1ses!2sar"
+                src="https://www.google.com/maps?q=412+Congress+Ave,+Austin,+TX+78701&output=embed"
                 allowfullscreen=""
                 loading="lazy"
                 referrerpolicy="no-referrer-when-downgrade"
@@ -64,3 +64,4 @@ import ContactInfoItem from './ui/ContactInfoItem.astro';
         </div>
     </div>
 </section>
+

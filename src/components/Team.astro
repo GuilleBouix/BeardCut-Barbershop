@@ -4,30 +4,36 @@ import TeamCard from './ui/TeamCard.astro';
 
 <section id="team" class="min-h-screen px-6 py-24 lg:px-20 2xl:px-30 flex items-center">
     <div class="mx-auto w-full max-w-7xl">
-        <h2 class="font-playfair font-semibold text-white text-3xl sm:text-4xl">
-            NUESTRO EQUIPO
+        <h2 class="font-playfair section-title font-semibold text-white text-3xl sm:text-4xl">
+            OUR TEAM
         </h2>
 
         <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
             <TeamCard
                 img="/images/barber-1.webp"
-                specialization="BARBERO ESTILISTA"
+                imgWidth={2048}
+                imgHeight={2048}
+                specialization="SENIOR BARBER STYLIST"
                 name="John Doe"
-                experience="Cortes clásicos."
+                experience="Classic cuts and timeless styles."
             />
 
             <TeamCard
                 img="/images/barber-2.webp"
-                specialization="BARBERO ESTILISTA"
+                imgWidth={500}
+                imgHeight={500}
+                specialization="BEARD SPECIALIST"
                 name="Michael Shawn"
-                experience="Diseño de barba."
+                experience="Precision beard sculpting and detailing."
             />
 
             <TeamCard
                 img="/images/barber-3.webp"
-                specialization="BARBERO ESTILISTA"
+                imgWidth={626}
+                imgHeight={626}
+                specialization="FADE EXPERT"
                 name="Marco Silva"
-                experience="Fade y degradados."
+                experience="Modern fades and clean blends."
             />
         </div>
     </div>

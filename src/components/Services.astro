@@ -1,14 +1,17 @@
 ﻿---
 import { ChevronsRight, ChevronsLeft } from '@lucide/astro';
-import ServicesList from './services/ServicesList';
+import ServicesList from './services/ServicesList.astro';
+import { getLandingServices } from '../lib/servicesLanding';
+
+const services = await getLandingServices();
 
 const galleryImages = [
-    { src: '/images/gallery-1.webp', alt: 'Corte de pelo fade clásico en BeardCut Oberá' },
-    { src: '/images/gallery-2.webp', alt: 'Barba diseñada con navaja - Barbería BeardCut' },
-    { src: '/images/gallery-3.webp', alt: 'Corte moderno con degradado - BeardCut Misiones' },
-    { src: '/images/gallery-4.webp', alt: 'Corte clásico americano en BeardCut Oberá' },
-    { src: '/images/gallery-5.webp', alt: 'Arreglo de barba y bigote - Servicios profesionales' },
-    { src: '/images/gallery-6.webp', alt: 'Corte y barba combo - Barbería BeardCut' }
+    { src: '/images/gallery-1.webp', alt: 'Classic fade haircut at BeardCut Austin', width: 1024, height: 1024 },
+    { src: '/images/gallery-2.webp', alt: 'Beard sculpting service at BeardCut', width: 1024, height: 1024 },
+    { src: '/images/gallery-3.webp', alt: 'Modern textured cut in Austin barbershop', width: 1024, height: 1024 },
+    { src: '/images/gallery-4.webp', alt: 'Traditional American cut at BeardCut', width: 1024, height: 1024 },
+    { src: '/images/gallery-5.webp', alt: 'Professional beard and moustache grooming', width: 1024, height: 1024 },
+    { src: '/images/gallery-6.webp', alt: 'Haircut and beard combo service', width: 1024, height: 1024 }
 ];
 
 const gallerySlides = [];
@@ -19,17 +22,17 @@ for (let i = 0; i < galleryImages.length; i += 3) {
 
 <section id="services" class="min-h-screen px-6 py-24 lg:px-20 2xl:px-30 flex items-center">
     <div class="mx-auto w-full max-w-7xl">
-        <h2 class="font-playfair font-semibold text-3xl sm:text-4xl text-white mb-8">
+        <h2 class="font-playfair section-title font-semibold text-3xl sm:text-4xl text-white mb-8">
             SERVICES
         </h2>
 
-        <ServicesList client:visible />
+        <ServicesList services={services} />
     </div>
 </section>
 
 <section class="min-h-screen px-6 py-24 lg:px-20 2xl:px-30 flex items-center">
     <div class="mx-auto w-full max-w-7xl">
-        <h3 class="font-playfair font-semibold text-3xl sm:text-4xl text-white mb-8">
+        <h3 class="section-title font-semibold text-3xl sm:text-4xl text-white mb-8">
             WORK GALLERY
         </h3>
 
@@ -43,8 +46,11 @@ for (let i = 0; i < galleryImages.length; i += 3) {
                                     <img
                                         src={image.src}
                                         alt={image.alt}
-                                        class="w-full h-56 sm:h-64 lg:h-80 object-cover grayscale transition duration-300 hover:scale-105 hover:grayscale-0"
+                                        width={image.width}
+                                        height={image.height}
                                         loading="lazy"
+                                        decoding="async"
+                                        class="w-full h-56 sm:h-64 lg:h-80 object-cover grayscale transition duration-300 hover:scale-105 hover:grayscale-0"
                                     />
                                 </div>
                             ))}

@@ -1,11 +1,11 @@
----
+﻿---
 import "../global.css";
 import type { Props } from '../types/layoutProps';
 
 const {
-    title = 'BeardCut | Barbería en Oberá, Misiones - Cortes, Barbas y Estilos',
-    description = 'BeardCut Barbería en Oberá, Misiones. Cortes classics, fades, diseño de barba y servicios profesionales. Reserva tu turno ahora.',
-    lang = 'es-AR',
+    title = 'BeardCut | Barbershop',
+    description = 'BeardCut Barbershop in Austin, Texas. Classic cuts, fades, beard design and premium grooming services. Book your appointment now.',
+    lang = 'en-US',
     canonicalURL = Astro.url.href,
     noIndex = false
 } = Astro.props as Props;
@@ -17,12 +17,12 @@ const schemaData = {
     "image": "https://beardcut.com/images/logo.webp",
     "address": {
         "@type": "PostalAddress",
-        "streetAddress": "Av. Beltrame N3360",
-        "addressLocality": "Oberá",
-        "addressRegion": "Misiones",
-        "addressCountry": "AR"
+        "streetAddress": "200 Congress Ave",
+        "addressLocality": "Austin",
+        "addressRegion": "Texas",
+        "addressCountry": "US"
     },
-    "telephone": "+54-9-3711-365214",
+    "telephone": "+1-512-555-0148",
     "email": "contact@beardcut.com",
     "priceRange": "$$",
     "openingHoursSpecification": [
@@ -41,8 +41,8 @@ const schemaData = {
     ],
     "geo": {
         "@type": "GeoCoordinates",
-        "latitude": "-27.4905078",
-        "longitude": "-55.1075074"
+        "latitude": "30.2672",
+        "longitude": "-97.7431"
     },
     "url": "https://beardcut.com",
     "sameAs": []
@@ -70,7 +70,7 @@ const schemaData = {
 		<meta property="og:type" content="website" />
 		<meta property="og:url" content={canonicalURL} />
 		<meta property="og:image" content="https://beardcut.com/images/og-image.webp" />
-		<meta property="og:locale" content="es_AR" />
+		<meta property="og:locale" content="en_US" />
 		<meta property="og:site_name" content="BeardCut Barbershop" />
 		
 		<!-- Twitter Card -->

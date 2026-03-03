@@ -1,0 +1,66 @@
+﻿---
+import type { AppointmentService } from '../../types/appointments';
+import { SERVICES_FALLBACK } from '../../data/services-fallback';
+
+interface Props {
+    services: AppointmentService[];
+}
+
+const { services } = Astro.props as Props;
+const uniqueFallback = SERVICES_FALLBACK.filter(
+    (fallbackService) => !services.some((service) => service.id === fallbackService.id)
+);
+const servicesToRender = [...services, ...uniqueFallback].slice(0, 12);
+
+const formatPrice = (price: number) =>
+    `$ ${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(price)}`;
+
+const serviceGroups = [
+    {
+        title: 'HAIRCUTS',
+        items: servicesToRender.slice(0, 4)
+    },
+    {
+        title: 'BEARD',
+        items: servicesToRender.slice(4, 8)
+    },
+    {
+        title: 'EXTRAS & COMBOS',
+        items: servicesToRender.slice(8, 12)
+    }
+];
+---
+
+{servicesToRender.length > 0 ? (
+    <div class="w-full">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-8">
+            {serviceGroups.map((group) => (
+                <div>
+                    <h3 class="font-semibold text-xl text-white mb-4">
+                        {group.title}
+                    </h3>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <tbody>
+                                {group.items.map((item, index) => (
+                                    <tr class={index < group.items.length - 1 ? 'border-b border-[#8F8F8F]' : ''}>
+                                        <td class="py-4 text-[#8F8F8F]">
+                                            {item.name}
+                                        </td>
+
+                                        <td class="py-4 text-right text-white font-medium whitespace-nowrap pl-4">
+                                            {formatPrice(item.price)}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            ))}
+        </div>
+    </div>
+) : (
+    <p class="text-[#9d9d9d]">No active services configured yet.</p>
+)}
