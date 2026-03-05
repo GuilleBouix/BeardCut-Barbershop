@@ -1,26 +1,135 @@
 # BeardCut Barbershop
 
-## Supabase SQL Guide
+Website para una barbería moderna construido con Astro, React y Tailwind CSS. Incluye sistema de reservas en línea, listado de servicios, información del equipo y contacto.
 
-This project uses Supabase Auth (Email OTP) and booking logic with:
-- one active future appointment per user,
-- slot collision prevention,
-- cancel flow,
-- and shared slot visibility across users.
+## Características
 
-Below you have SQL scripts with clear comments.
+- **Reservas en línea**: Sistema de citas con validación de disponibilidad en tiempo real
+- **Servicios**: Catálogo de servicios con precios y duración
+- **Equipo**: Presentación del equipo de barberos
+- **Contacto**: Formulario de contacto e información de ubicación
+- **Autenticación**: Login con Email OTP via Supabase Auth
+- **Diseño responsive**: Optimizado para móviles y escritorio
+- **Modo oscuro**: Interfaz con tema oscuro elegante
+
+## Tech Stack
+
+| Tecnología | Propósito |
+|------------|-----------|
+| Astro 5.x | Framework principal |
+| React 19 | Componentes interactivos |
+| Tailwind CSS 4.x | Estilos y diseño |
+| Supabase | Base de datos y autenticación |
+| lucide-astro | Iconos |
+
+## Requisitos Previos
+
+- Node.js 18+ 
+- npm o pnpm
+- Cuenta de Supabase
+
+## Instalación
+
+1. **Clonar el repositorio**
+
+```bash
+git clone <repo-url>
+cd BeardCut-Barbershop
+```
+
+2. **Instalar dependencias**
+
+```bash
+npm install
+```
+
+3. **Configurar variables de entorno**
+
+Crea un archivo `.env` en la raíz del proyecto:
+
+```env
+# URL de tu proyecto Supabase
+PUBLIC_SUPABASE_URL=your_supabase_url
+
+# Clave pública anónima de Supabase
+PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+4. **Iniciar servidor de desarrollo**
+
+```bash
+npm run dev
+```
+
+El sitio estará disponible en `http://localhost:4321`
+
+## Comandos
+
+| Comando | Descripción |
+|---------|-------------|
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` | Build de producción |
+| `npm run preview` | Preview del build |
+| `npx astro check` | Verificación de tipos |
+
+## Estructura del Proyecto
+
+```
+src/
+├── components/
+│   ├── ui/              # Componentes reutilizables
+│   ├── appointments/    # Componentes de reservas
+│   └── services/        # Componentes de servicios
+├── data/                # Datos estáticos
+├── layouts/             # Layouts de página
+├── lib/                 # Utilidades (Supabase client)
+├── pages/               # Páginas Astro
+├── scripts/             # Scripts del cliente
+├── types/               # Definiciones TypeScript
+└── global.css           # Estilos globales
+```
+
+## Configuración de Supabase
+
+### Tablas Requeridas
+
+El proyecto requiere las siguientes tablas en Supabase:
+
+```sql
+-- Servicios de barbería
+create table if not exists public.services (
+  id text primary key,
+  name text not null,
+  duration_min int not null,
+  price numeric not null,
+  active boolean default true
+);
+
+-- Horarios de operación
+create table if not exists public.business_shifts (
+  id uuid primary key default gen_random_uuid(),
+  weekday int not null,  -- 0=Domingo, 1=Lunes, etc.
+  open_time time not null,
+  close_time time not null,
+  is_active boolean default true
+);
+```
+
+### SQL Completo para Reservas
+
+A continuación se incluye el script SQL completo con comentarios para configurar el sistema de reservas:
 
 ---
 
-## 1) Base setup (run once on a fresh project)
+## 1) Configuración Base (ejecutar una vez)
 
-Use this section if your project does **not** have the appointments table, RLS, and RPCs yet.
+Usa esta sección si tu proyecto **no** tiene la tabla appointments, RLS y RPCs.
 
 ```sql
--- Extension required for UUID generation.
+-- Extensión requerida para generación de UUIDs.
 create extension if not exists pgcrypto;
 
--- Main table for customer appointments.
+-- Tabla principal para citas de clientes.
 create table if not exists public.appointments (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -36,16 +145,16 @@ create table if not exists public.appointments (
   updated_at timestamptz not null default now()
 );
 
--- Speeds up user/status/date lookups.
+-- Índices para búsquedas rápidas por usuario/estado/fecha.
 create index if not exists idx_appointments_user_status_date
   on public.appointments (user_id, status, date_iso, slot_time);
 
--- Prevents two active bookings on the same slot.
+-- Previene dos reservas activas en el mismo horario.
 create unique index if not exists uq_appointments_booked_slot
   on public.appointments (date_iso, slot_time)
   where status = 'booked';
 
--- Auto-update updated_at on every row update.
+-- Auto-actualiza updated_at en cada fila.
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
@@ -62,7 +171,7 @@ before update on public.appointments
 for each row
 execute function public.set_updated_at();
 
--- Enable RLS and allow each user to access only their own appointments.
+-- Habilitar RLS y permitir acceso solo a propias citas.
 alter table public.appointments enable row level security;
 
 drop policy if exists "appointments_select_own" on public.appointments;
@@ -87,7 +196,7 @@ to authenticated
 using (auth.uid() = user_id)
 with check (auth.uid() = user_id);
 
--- RPC: create appointment with business rules enforced atomically.
+-- RPC: crear cita con reglas de negocio enforced atómicamente.
 create or replace function public.create_appointment(
   p_service_id text,
   p_date_iso date,
@@ -128,12 +237,12 @@ begin
     raise exception 'Customer phone is required';
   end if;
 
-  -- Future-only booking rule.
+  -- Solo reservas futuras.
   if v_appointment_timestamp <= v_now_local then
     raise exception 'You can only reserve future slots';
   end if;
 
-  -- One active future appointment per user.
+  -- Una cita activa futura por usuario.
   if exists (
     select 1
     from public.appointments a
@@ -144,7 +253,7 @@ begin
     raise exception 'You already have an active appointment';
   end if;
 
-  -- Slot collision prevention.
+  -- Prevenir colisión de horarios.
   if exists (
     select 1
     from public.appointments a
@@ -186,7 +295,7 @@ $$;
 revoke all on function public.create_appointment(text, date, time, text, text, text, text) from public;
 grant execute on function public.create_appointment(text, date, time, text, text, text, text) to authenticated;
 
--- RPC: cancel own appointment before the slot starts.
+-- RPC: cancelar cita propia antes del horario.
 create or replace function public.cancel_my_appointment(
   p_appointment_id uuid
 )
@@ -238,9 +347,9 @@ grant execute on function public.cancel_my_appointment(uuid) to authenticated;
 
 ---
 
-## 2) Read policies for services and shifts (required for scheduler UI)
+## 2) Políticas de Lectura para Servicios y Horarios
 
-Use this section so authenticated users can load active services and business shifts.
+Ej que usuariosecuta esto para autenticados puedan cargar servicios activos y horarios.
 
 ```sql
 alter table if exists public.services enable row level security;
@@ -277,13 +386,9 @@ using (is_active = true);
 
 ---
 
-## 3) Incremental patch: shared booked-slot visibility (NEW)
+## 3) Patch: Visibilidad Compartida de Horarios Reservados
 
-Run this if you already had the base setup, but need users to see slots reserved by others as `RESERVED`.
-
-Why:
-- Direct `select` on `appointments` is restricted by RLS (`auth.uid() = user_id`).
-- This RPC returns only `slot_time` for a date, without exposing personal data.
+Ejecuta esto si ya tienes la configuración base pero necesitas que usuarios vean horarios reservados por otros como `RESERVADO`.
 
 ```sql
 create or replace function public.get_booked_slots_by_date(
@@ -314,10 +419,69 @@ grant execute on function public.get_booked_slots_by_date(date) to authenticated
 
 ---
 
-## Quick verification checklist
+## Checklist de Verificación
 
-After running SQL:
-1. Login with User A, book a slot.
-2. Login with User B, open same date.
-3. That slot must appear as `RESERVED` (no button).
-4. User A should still see their active booking card with cancel action.
+Después de ejecutar el SQL:
+1. Inicia sesión con Usuario A, reserva un horario.
+2. Inicia sesión con Usuario B, abre la misma fecha.
+3. Ese horario debe aparecer como `RESERVADO` (sin botón).
+4. Usuario A debe seguir viendo su cita activa con opción de cancelar.
+
+## Datos de Ejemplo (Servicios)
+
+Inserta servicios de ejemplo en la tabla `services`:
+
+```sql
+insert into public.services (id, name, duration_min, price, active) values
+('corte', 'Corte de cabello', 30, 2500, true),
+('barba', 'Arreglo de barba', 20, 1500, true),
+('corte-barba', 'Corte + Barba', 45, 3500, true),
+('afeitado', 'Afeitado clásico', 25, 1800, true),
+('tratamiento', 'Tratamiento capilar', 40, 2200, true);
+```
+
+## Datos de Ejemplo (Horarios)
+
+Inserta horarios de ejemplo en `business_shifts` (1=Lunes a 6=Sábado):
+
+```sql
+insert into public.business_shifts (weekday, open_time, close_time, is_active) values
+(1, '09:00:00', '20:00:00', true),  -- Lunes
+(2, '09:00:00', '20:00:00', true),  -- Martes
+(3, '09:00:00', '20:00:00', true),  -- Miércoles
+(4, '09:00:00', '20:00:00', true),  -- Jueves
+(5, '09:00:00', '20:00:00', true),  -- Viernes
+(6, '09:00:00', '20:00:00', true);  -- Sábado
+```
+
+## Despliegue
+
+### Build de Producción
+
+```bash
+npm run build
+```
+
+### Preview Local
+
+```bash
+npm run preview
+```
+
+### Despliegue Recomendado
+
+- **Vercel**: Configuración automática con Astro
+- **Netlify**: Compatible con Astro
+- **Cloudflare Pages**: Compatible con Astro
+
+## Contribución
+
+1. Fork del repositorio
+2. Crear branch (`git checkout -b feature/nueva-caracteristica`)
+3. Commit cambios (`git commit -m 'Agregar nueva característica'`)
+4. Push al branch (`git push origin feature/nueva-caracteristica`)
+5. Crear Pull Request
+
+## Licencia
+
+MIT License - feel free to use this project for your own barbershop.
