@@ -5,6 +5,9 @@ export interface AppointmentService {
     price: number;
 }
 
+export type AppointmentStatus = 'booked' | 'canceled';
+export type AuthState = 'checking' | 'authenticated' | 'unauthenticated';
+
 export interface TimeSlot {
     id: string;
     time: string;
@@ -28,6 +31,21 @@ export interface SelectedBooking {
     serviceId: string;
     dateISO: string;
     slotId: string;
+}
+
+export interface UserAppointment {
+    id: string;
+    user_id: string;
+    service_id: string;
+    date_iso: string;
+    slot_time: string;
+    customer_name: string;
+    customer_email: string;
+    customer_phone: string;
+    notes: string | null;
+    status: AppointmentStatus;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface BusinessShift {

@@ -1,4 +1,5 @@
 ﻿@import "tailwindcss";
+@import "tailwindcss-animated";
 
 /* Fuente Personalizada */
 @font-face {
@@ -67,3 +68,4 @@ body {
   --breakpoint-2xs: 30rem;
   --breakpoint-1xs: 20rem;
 }
+

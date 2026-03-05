@@ -14,34 +14,56 @@ import iconImage from "../../assets/images/icon.webp";
         loading="eager"
         decoding="async"
         quality={68}
-        class="hidden w-10 max-md:block"
+        class="hidden w-10 max-md:block
+        animate-fade animate-duration-500"
     />
 
     <!-- Navigation menu -->
-    <nav id="menu" class="flex jus items-center space-x-12 text-sm text-gray-300 font-light max-md:hidden">
-        <a class="nav-link opacity-80 hover:opacity-100 outline-none hover:text-white duration-200" href="/#home">
+    <nav id="menu" class="flex items-center space-x-12 text-sm text-gray-300 font-light max-md:hidden">
+        <a class="nav-link opacity-80 hover:opacity-100 outline-none hover:text-white duration-200
+        animate-fade animate-delay-100" href="/#home">
             Home
         </a>
 
-        <a class="nav-link opacity-80 hover:opacity-100 outline-none hover:text-white duration-200" href="/#about">
+        <a class="nav-link opacity-80 hover:opacity-100 outline-none hover:text-white duration-200
+        animate-fade animate-delay-150" href="/#about">
             About
         </a>
 
-        <a class="nav-link opacity-80 hover:opacity-100 outline-none hover:text-white duration-200" href="/#team">
+        <a class="nav-link opacity-80 hover:opacity-100 outline-none hover:text-white duration-200
+        animate-fade animate-delay-200" href="/#team">
             Team
         </a>
 
-        <a class="nav-link opacity-80 hover:opacity-100 outline-none hover:text-white duration-200" href="/#services">
+        <a class="nav-link opacity-80 hover:opacity-100 outline-none hover:text-white duration-200
+        animate-fade animate-delay-250" href="/#services">
             Services
         </a>
 
-        <a class="nav-link opacity-80 hover:opacity-100 outline-none hover:text-white duration-200" href="/#contact">
+        <a class="nav-link opacity-80 hover:opacity-100 outline-none hover:text-white duration-200
+        animate-fade animate-delay-300" href="/#contact">
             Contact
         </a>
+
+        <a
+            id="auth-login-link-desktop"
+            class="nav-link opacity-80 hover:opacity-100 outline-none hover:text-white duration-200 animate-fade animate-delay-350"
+            href="/login"
+        >
+            Login
+        </a>
+        <button
+            id="auth-logout-btn-desktop"
+            type="button"
+            class="hidden nav-link opacity-80 hover:opacity-100 outline-none hover:text-white duration-200 animate-fade animate-delay-350 cursor-pointer bg-transparent border-0 p-0"
+        >
+            Logout
+        </button>
     </nav>
 
     <!-- Hamburger button -->
-    <button id="menu-button" class="hidden items-center justify-center cursor-pointer text-3xl text-gray-300 duration-300 hover:text-white max-md:flex max-md:ml-auto" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
+    <button id="menu-button" class="hidden items-center justify-center cursor-pointer text-3xl text-gray-300 duration-300 hover:text-white max-md:flex max-md:ml-auto
+    animate-fade animate-duration-500 animate-delay-100" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
         <span id="icon-menu" aria-hidden="true">
             <Menu />
         </span>
@@ -73,10 +95,26 @@ import iconImage from "../../assets/images/icon.webp";
         <a class="nav-link text-gray-300 outline-none py-3 duration-300 hover:text-white" href="/#contact">
             Contact
         </a>
+
+        <a
+            id="auth-login-link-mobile"
+            class="nav-link text-gray-300 outline-none py-3 duration-300 hover:text-white"
+            href="/login"
+        >
+            Login
+        </a>
+        <button
+            id="auth-logout-btn-mobile"
+            type="button"
+            class="hidden nav-link text-left text-gray-300 outline-none py-3 duration-300 hover:text-white cursor-pointer bg-transparent border-0 p-0"
+        >
+            Logout
+        </button>
     </nav>
 </div>
 
 <script src="../../scripts/navbar.ts"></script>
+<script src="../../scripts/auth-nav.ts"></script>
 
 <style>
     .site-navbar {

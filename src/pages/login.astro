@@ -1,0 +1,12 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Navbar from "../components/ui/Navbar.astro";
+import Footer from "../components/ui/Footer.astro";
+import LoginPanel from "../components/auth/LoginPanel";
+---
+
+<Layout title="BeardCut | Login" description="Login with email to manage your booking.">
+  <Navbar />
+  <LoginPanel client:load />
+  <Footer />
+</Layout>
