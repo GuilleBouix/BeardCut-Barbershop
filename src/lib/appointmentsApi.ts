@@ -64,24 +64,33 @@ export const getMyActiveAppointment = async (): Promise<UserAppointment | null> 
 };
 
 export const getBookedSlotsByDate = async (dateISO: string): Promise<string[]> => {
-  const { data, error } = await supabaseClient
-    .from("appointments")
-    .select("slot_time")
-    .eq("status", "booked")
-    .eq("date_iso", dateISO);
+  const { data, error } = await supabaseClient.rpc(
+    "get_booked_slots_by_date",
+    {
+      p_date_iso: dateISO,
+    },
+  );
 
   if (error) {
     const message = normalizeError(
       error,
       "Could not load occupied slots for selected date.",
     );
-    if (
-      message.includes("relation") ||
-      message.includes("appointments") ||
-      message.includes("permission denied")
-    ) {
-      return [];
+
+    if (message.toLowerCase().includes("does not exist")) {
+      const fallback = await supabaseClient
+        .from("appointments")
+        .select("slot_time")
+        .eq("status", "booked")
+        .eq("date_iso", dateISO);
+
+      if (fallback.error) {
+        return [];
+      }
+
+      return (fallback.data ?? []).map((row) => String(row.slot_time).slice(0, 5));
     }
+
     throw new Error(
       message,
     );

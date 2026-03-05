@@ -27,8 +27,8 @@ const EMPTY_FORM: BookingFormData = {
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const SLOT_INTERVAL_MIN = 30;
-const DAYS_TO_SHOW = 10;
 const DAYS_PER_PAGE = 5;
+const MAX_DAYS_AHEAD = 31;
 
 const minutesToHHMM = (minutes: number) => {
   const h = Math.floor(minutes / 60)
@@ -84,11 +84,10 @@ const buildDaysFromShifts = (shifts: BusinessShift[]): ScheduleDay[] => {
 
   const result: ScheduleDay[] = [];
   const cursor = new Date();
+  const endDate = new Date();
+  endDate.setDate(endDate.getDate() + MAX_DAYS_AHEAD);
 
-  let traversedDays = 0;
-  const maxDaysToTraverse = 90;
-
-  while (result.length < DAYS_TO_SHOW && traversedDays < maxDaysToTraverse) {
+  while (cursor <= endDate) {
     const weekday = cursor.getDay();
     const shiftsForDay = grouped.get(weekday) ?? [];
 
@@ -122,7 +121,6 @@ const buildDaysFromShifts = (shifts: BusinessShift[]): ScheduleDay[] => {
     }
 
     cursor.setDate(cursor.getDate() + 1);
-    traversedDays += 1;
   }
 
   return result;
@@ -354,6 +352,14 @@ export default function AppointmentsPanel() {
     [services, selectedServiceId],
   );
 
+  const selectedSummary = useMemo(() => {
+    if (!selectedService || !selectedDayISO || !selectedSlotId) {
+      return "";
+    }
+
+    return `${selectedService.name} on ${formatLongDate(selectedDayISO)} at ${selectedSlotId}`;
+  }, [selectedDayISO, selectedService, selectedSlotId]);
+
   const selectedDaySlots = useMemo(() => {
     return (
       selectedDay?.slots.map((slot) => ({
@@ -398,10 +404,10 @@ export default function AppointmentsPanel() {
     }
 
     const nextPage = Math.floor(index / DAYS_PER_PAGE);
-    if (nextPage !== dayPage) {
-      setDayPage(nextPage);
-    }
-  }, [days, selectedDayISO, dayPage]);
+    setDayPage((currentPage) =>
+      currentPage === nextPage ? currentPage : nextPage,
+    );
+  }, [days, selectedDayISO]);
 
   useEffect(() => {
     if (dayPage > maxDayPage) {
@@ -518,7 +524,32 @@ export default function AppointmentsPanel() {
 
         <div className="bg-[#101010] border border-[#3d3d3d] text-[#8f8f8f] p-3 sm:p-5 lg:p-6 animate-fade-down animate-duration-700 animate-delay-300">
           {isLoading ? (
-            <p className="text-[#bdbdbd]">Loading booking data...</p>
+            <div className="space-y-6 animate-pulse">
+              <div className="h-8 w-60 bg-[#1f1f1f]" />
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <div className="h-5 w-40 bg-[#1f1f1f]" />
+                  <div className="h-12 w-full bg-[#1a1a1a]" />
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+                    <div className="h-10 bg-[#1f1f1f]" />
+                    <div className="h-10 bg-[#1f1f1f]" />
+                    <div className="h-10 bg-[#1f1f1f]" />
+                    <div className="h-10 bg-[#1f1f1f]" />
+                    <div className="h-10 bg-[#1f1f1f]" />
+                  </div>
+                  <div className="h-60 w-full bg-[#1a1a1a]" />
+                </div>
+                <div className="space-y-3">
+                  <div className="h-5 w-48 bg-[#1f1f1f]" />
+                  <div className="h-10 w-full bg-[#1a1a1a]" />
+                  <div className="h-10 w-full bg-[#1a1a1a]" />
+                  <div className="h-10 w-full bg-[#1a1a1a]" />
+                  <div className="h-10 w-full bg-[#1a1a1a]" />
+                  <div className="h-20 w-full bg-[#1a1a1a]" />
+                  <div className="h-10 w-full bg-[#f0f0f0]/20" />
+                </div>
+              </div>
+            </div>
           ) : activeAppointment ? (
             <div className="border border-[#3d3d3d] bg-[#141414] p-4 sm:p-5">
               <h2 className="text-xl text-white font-semibold">
@@ -686,7 +717,7 @@ export default function AppointmentsPanel() {
 
                               {!slot.available ? (
                                 <span className="text-[#8f8f8f] px-3 py-1 text-sm">
-                                  Occupied
+                                  RESERVED
                                 </span>
                               ) : isSelected ? (
                                 <button
@@ -835,6 +866,12 @@ export default function AppointmentsPanel() {
                     >
                       {isSubmitting ? "Confirming..." : "Confirm Appointment"}
                     </button>
+
+                    {selectedSummary && (
+                      <div className="rounded-sm border border-green-700 bg-green-900/25 px-3 py-2 text-xs sm:text-sm text-green-300">
+                        Selected appointment: {selectedSummary}
+                      </div>
+                    )}
                   </form>
                 </section>
               </aside>
