@@ -35,7 +35,7 @@ Website para una barbería moderna construido con Astro, React y Tailwind CSS. I
 1. **Clonar el repositorio**
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/GuilleBouix/BeardCut-Barbershop.git
 cd BeardCut-Barbershop
 ```
 
