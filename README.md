@@ -90,7 +90,7 @@ src/
 
 ## Documentación
 
-Consulta la carpeta `Docs/` para información detallada:
+Consulta la carpeta `docs/` para información detallada:
 
 | Documento | Descripción |
 |-----------|-------------|
