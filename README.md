@@ -4,8 +4,6 @@
 
 Website para una barbería moderna construido con Astro, React y Tailwind CSS. Incluye sistema de reservas en línea, listado de servicios, información del equipo y contacto.
 
-![BeardCut Barbershop](https://beardcut.vercel.app/images/og-image.jpg)
-
 ## Características
 
 - **Reservas en línea**: Sistema de citas con validación de disponibilidad en tiempo real
