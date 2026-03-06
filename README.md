@@ -1,3 +1,5 @@
+![Sin título-1](https://github.com/user-attachments/assets/54219999-cc8c-4301-86db-52d5f5418719)
+
 # BeardCut Barbershop
 
 Website para una barbería moderna construido con Astro, React y Tailwind CSS. Incluye sistema de reservas en línea, listado de servicios, información del equipo y contacto.
