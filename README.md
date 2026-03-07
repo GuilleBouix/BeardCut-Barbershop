@@ -4,8 +4,6 @@
 
 Website para una barbería moderna construido con Astro, React y Tailwind CSS. Incluye sistema de reservas en línea, listado de servicios, información del equipo y contacto.
 
-![BeardCut Barbershop](https://beardcut.vercel.app/images/og-image.jpg)
-
 ## Características
 
 - **Reservas en línea**: Sistema de citas con validación de disponibilidad en tiempo real
@@ -37,7 +35,7 @@ Website para una barbería moderna construido con Astro, React y Tailwind CSS. I
 1. **Clonar el repositorio**
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/GuilleBouix/BeardCut-Barbershop.git
 cd BeardCut-Barbershop
 ```
 
@@ -92,7 +90,7 @@ src/
 
 ## Documentación
 
-Consulta la carpeta `Docs/` para información detallada:
+Consulta la carpeta `docs/` para información detallada:
 
 | Documento | Descripción |
 |-----------|-------------|
