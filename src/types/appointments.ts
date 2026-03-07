@@ -44,8 +44,6 @@ export interface UserAppointment {
     customer_phone: string;
     notes: string | null;
     status: AppointmentStatus;
-    created_at: string;
-    updated_at: string;
 }
 
 export interface BusinessShift {

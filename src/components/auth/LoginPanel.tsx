@@ -1,6 +1,19 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { supabaseClient } from "../../lib/supabaseClient";
 
+const EMAIL_MAX_LENGTH = 254;
+
+const sanitizeInput = (input: string): string => {
+  return input
+    .replace(/[<>\"'&]/g, "")
+    .trim();
+};
+
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
 export default function LoginPanel() {
   const [email, setEmail] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -19,29 +32,48 @@ export default function LoginPanel() {
     setErrorMessage("");
     setSuccessMessage("");
 
-    const normalizedEmail = email.trim().toLowerCase();
-    if (!normalizedEmail) {
+    const sanitizedEmail = sanitizeInput(email);
+
+    if (!sanitizedEmail) {
       setErrorMessage("Email is required.");
       return;
     }
 
-    setIsSending(true);
-    const { error } = await supabaseClient.auth.signInWithOtp({
-      email: normalizedEmail,
-      options: {
-        emailRedirectTo,
-      },
-    });
-    setIsSending(false);
-
-    if (error) {
-      setErrorMessage(error.message || "Could not send login link.");
+    if (sanitizedEmail.length > EMAIL_MAX_LENGTH) {
+      setErrorMessage(`Email must be less than ${EMAIL_MAX_LENGTH} characters.`);
       return;
     }
 
-    setSuccessMessage(
-      "Magic link sent. Check your email and open the link to continue.",
-    );
+    const normalizedEmail = sanitizedEmail.toLowerCase();
+
+    if (!isValidEmail(normalizedEmail)) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+
+    setIsSending(true);
+    try {
+      const { error } = await supabaseClient.auth.signInWithOtp({
+        email: normalizedEmail,
+        options: {
+          emailRedirectTo,
+        },
+      });
+      setIsSending(false);
+
+      if (error) {
+        setErrorMessage(error.message || "Could not send login link.");
+        return;
+      }
+
+      setSuccessMessage(
+        "Magic link sent. Check your email and open the link to continue.",
+      );
+      setEmail("");
+    } catch (err) {
+      setIsSending(false);
+      setErrorMessage("An unexpected error occurred. Please try again.");
+    }
   };
 
   return (
@@ -64,6 +96,7 @@ export default function LoginPanel() {
               id="login-email"
               type="email"
               autoComplete="email"
+              maxLength={EMAIL_MAX_LENGTH}
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               placeholder="you@example.com"

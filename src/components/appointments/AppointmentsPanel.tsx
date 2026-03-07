@@ -17,6 +17,8 @@ import {
   getCurrentSession,
   getMyActiveAppointment,
 } from "../../lib/appointmentsApi";
+import { initSessionManager, refreshSession, destroySession } from "../../lib/sessionManager";
+import { checkBookingLimit, recordBookingAttempt, resetBookingLimit } from "../../lib/rateLimiter";
 
 const EMPTY_FORM: BookingFormData = {
   name: "",
@@ -29,6 +31,31 @@ const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const SLOT_INTERVAL_MIN = 30;
 const DAYS_PER_PAGE = 5;
 const MAX_DAYS_AHEAD = 31;
+
+const NAME_MAX_LENGTH = 100;
+const EMAIL_MAX_LENGTH = 254;
+const PHONE_MIN_LENGTH = 10;
+const PHONE_MAX_LENGTH = 20;
+const NOTES_MAX_LENGTH = 500;
+
+const sanitizeInput = (input: string): string => {
+  return input.replace(/[<>\"'&]/g, "");
+};
+
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const isValidPhone = (phone: string): boolean => {
+  const phoneRegex = /^[+\d\s()-]{10,20}$/;
+  return phoneRegex.test(phone.replace(/\s/g, ""));
+};
+
+const isValidName = (name: string): boolean => {
+  const nameRegex = /^[a-zA-Z\s'-]+$/;
+  return nameRegex.test(name);
+};
 
 const minutesToHHMM = (minutes: number) => {
   const h = Math.floor(minutes / 60)
@@ -204,6 +231,30 @@ export default function AppointmentsPanel() {
       authListener.subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (authState === "unauthenticated" && !isLoading) {
+      window.location.href = "/login";
+    }
+  }, [authState, isLoading]);
+
+  useEffect(() => {
+    if (authState !== "authenticated") {
+      return;
+    }
+
+    const handleSessionExpired = () => {
+      destroySession();
+      supabaseClient.auth.signOut();
+      setAuthState("unauthenticated");
+      setActiveAppointment(null);
+      setErrorMessage("Your session has expired. Please log in again.");
+    };
+
+    const cleanup = initSessionManager(handleSessionExpired);
+
+    return cleanup;
+  }, [authState]);
 
   useEffect(() => {
     if (authState !== "authenticated") {
@@ -420,6 +471,12 @@ export default function AppointmentsPanel() {
     setErrorMessage("");
     setSuccessMessage("");
 
+    const bookingCheck = checkBookingLimit();
+    if (!bookingCheck.allowed) {
+      setErrorMessage(bookingCheck.message);
+      return;
+    }
+
     if (!selectedServiceId || !selectedDayISO || !selectedSlotId) {
       setErrorMessage(
         "Select a service and an available slot before continuing.",
@@ -427,8 +484,58 @@ export default function AppointmentsPanel() {
       return;
     }
 
-    if (!form.name.trim() || !form.email.trim() || !form.phone.trim()) {
-      setErrorMessage("Name, email and phone are required.");
+    const sanitizedName = sanitizeInput(form.name);
+    const sanitizedEmail = sanitizeInput(form.email);
+    const sanitizedPhone = sanitizeInput(form.phone);
+    const sanitizedNotes = form.notes ? sanitizeInput(form.notes) : "";
+
+    if (!sanitizedName) {
+      setErrorMessage("Name is required.");
+      return;
+    }
+
+    if (sanitizedName.length > NAME_MAX_LENGTH) {
+      setErrorMessage(`Name must be less than ${NAME_MAX_LENGTH} characters.`);
+      return;
+    }
+
+    if (!isValidName(sanitizedName)) {
+      setErrorMessage("Name can only contain letters, spaces, hyphens and apostrophes.");
+      return;
+    }
+
+    if (!sanitizedEmail) {
+      setErrorMessage("Email is required.");
+      return;
+    }
+
+    if (sanitizedEmail.length > EMAIL_MAX_LENGTH) {
+      setErrorMessage(`Email must be less than ${EMAIL_MAX_LENGTH} characters.`);
+      return;
+    }
+
+    if (!isValidEmail(sanitizedEmail)) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+
+    if (!sanitizedPhone) {
+      setErrorMessage("Phone is required.");
+      return;
+    }
+
+    if (sanitizedPhone.length < PHONE_MIN_LENGTH || sanitizedPhone.length > PHONE_MAX_LENGTH) {
+      setErrorMessage(`Phone must be between ${PHONE_MIN_LENGTH} and ${PHONE_MAX_LENGTH} digits.`);
+      return;
+    }
+
+    if (!isValidPhone(sanitizedPhone)) {
+      setErrorMessage("Please enter a valid phone number.");
+      return;
+    }
+
+    if (sanitizedNotes.length > NOTES_MAX_LENGTH) {
+      setErrorMessage(`Notes must be less than ${NOTES_MAX_LENGTH} characters.`);
       return;
     }
 
@@ -438,20 +545,23 @@ export default function AppointmentsPanel() {
         serviceId: selectedServiceId,
         dateISO: selectedDayISO,
         slotTime: selectedSlotId,
-        customerName: form.name.trim(),
-        customerEmail: form.email.trim(),
-        customerPhone: form.phone.trim(),
-        notes: form.notes,
+        customerName: sanitizedName.trim(),
+        customerEmail: sanitizedEmail.trim().toLowerCase(),
+        customerPhone: sanitizedPhone.trim(),
+        notes: sanitizedNotes.trim() || undefined,
       });
 
       setActiveAppointment(appointment);
       setSuccessMessage("Appointment created successfully.");
+      refreshSession();
+      resetBookingLimit();
       setSelectedSlotId("");
       setForm((prev) => ({
         ...EMPTY_FORM,
         email: prev.email,
       }));
     } catch (error) {
+      recordBookingAttempt();
       setErrorMessage((error as Error).message);
       const refreshed = await getMyActiveAppointment().catch(() => null);
       setActiveAppointment(refreshed);
@@ -472,6 +582,7 @@ export default function AppointmentsPanel() {
       await cancelAppointment(activeAppointment.id);
       setActiveAppointment(null);
       setSuccessMessage("Appointment canceled successfully.");
+      refreshSession();
       const refreshedSlots = await getBookedSlotsByDate(selectedDayISO).catch(
         () => [],
       );
@@ -487,25 +598,6 @@ export default function AppointmentsPanel() {
     return (
       <section className="min-h-screen px-4 py-20 flex items-center justify-center">
         <p className="text-[#bdbdbd]">Checking session...</p>
-      </section>
-    );
-  }
-
-  if (authState === "unauthenticated") {
-    return (
-      <section className="min-h-screen px-4 py-20 flex items-center justify-center">
-        <div className="w-full max-w-md border border-[#3d3d3d] bg-[#101010] p-6 text-center">
-          <h1 className="font-playfair text-3xl text-white">Login Required</h1>
-          <p className="mt-3 text-sm text-[#a8a8a8]">
-            You must sign in before booking an appointment.
-          </p>
-          <a
-            href="/login"
-            className="mt-6 inline-flex w-full items-center justify-center border border-white bg-white px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-black transition hover:bg-transparent hover:text-white"
-          >
-            Go to Login
-          </a>
-        </div>
       </section>
     );
   }
@@ -762,6 +854,7 @@ export default function AppointmentsPanel() {
                       <input
                         id="appointment-name"
                         type="text"
+                        maxLength={NAME_MAX_LENGTH}
                         value={form.name}
                         onChange={(event) =>
                           setForm((prev) => ({
@@ -783,6 +876,7 @@ export default function AppointmentsPanel() {
                       <input
                         id="appointment-email"
                         type="email"
+                        maxLength={EMAIL_MAX_LENGTH}
                         value={form.email}
                         onChange={(event) =>
                           setForm((prev) => ({
@@ -804,6 +898,8 @@ export default function AppointmentsPanel() {
                       <input
                         id="appointment-phone"
                         type="tel"
+                        maxLength={PHONE_MAX_LENGTH}
+                        minLength={PHONE_MIN_LENGTH}
                         value={form.phone}
                         onChange={(event) =>
                           setForm((prev) => ({
@@ -848,6 +944,7 @@ export default function AppointmentsPanel() {
                       </label>
                       <textarea
                         id="appointment-notes"
+                        maxLength={NOTES_MAX_LENGTH}
                         value={form.notes}
                         onChange={(event) =>
                           setForm((prev) => ({

@@ -7,23 +7,21 @@ import react from "@astrojs/react";
 // https://astro.build/config
 export default defineConfig({
   site: "https://beardcut.vercel.app",
-
   build: {
     inlineStylesheets: "always",
   },
-
   devToolbar: {
     enabled: false,
   },
-
   server: {
     host: true,
     port: 4321,
   },
-
   vite: {
     plugins: [tailwindcss()],
+    ssr: {
+      external: ["@supabase/supabase-js"],
+    },
   },
-
   integrations: [react()],
 });

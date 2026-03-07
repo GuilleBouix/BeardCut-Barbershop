@@ -3,7 +3,7 @@ import { supabaseClient } from "./supabaseClient";
 import type { UserAppointment } from "../types/appointments";
 
 const APPOINTMENTS_COLUMNS =
-  "id,user_id,service_id,date_iso,slot_time,customer_name,customer_email,customer_phone,notes,status,created_at,updated_at";
+  "id,user_id,service_id,date_iso,slot_time,customer_name,customer_email,customer_phone,notes,status";
 
 export interface CreateAppointmentInput {
   serviceId: string;

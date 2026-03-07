@@ -59,7 +59,6 @@ const schemaData = {
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/images/favicon.ico" sizes="32x32" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="generator" content={Astro.generator} />
 		<meta name="description" content={description} />
 		{noIndex ? (
 			<meta name="robots" content="noindex, nofollow" />
@@ -90,6 +89,8 @@ const schemaData = {
         <main>
             <slot />
         </main>
+        <script src="../scripts/booking-redirect.ts"></script>
+        <script src="../scripts/auth-nav.ts"></script>
 	</body>
 </html>
 
