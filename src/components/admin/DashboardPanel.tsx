@@ -245,15 +245,41 @@ export default function DashboardPanel() {
     return appointments.filter((item) => item.status === statusFilter);
   }, [appointments, statusFilter]);
 
+  const hasBookedAppointmentsForService = useCallback(
+    (serviceId: string) =>
+      appointments.some(
+        (item) => item.service_id === serviceId && item.status === "booked",
+      ),
+    [appointments],
+  );
+
+  const getTodayISO = () => new Date().toISOString().slice(0, 10);
+
+  const isWithinRanges = (
+    timeValue: string,
+    ranges: Array<{ start: number; end: number }>,
+  ) => {
+    const minutes = timeToMinutes(String(timeValue).slice(0, 5));
+    return ranges.some(
+      (range) => minutes >= range.start && minutes < range.end,
+    );
+  };
+
   const handleCompleteAppointment = useCallback(
     async (appointment: AdminAppointment) => {
-      if (appointment.status !== "booked" || !adminUserId) {
+      if (
+        appointment.status !== "booked" ||
+        !adminUserId ||
+        busyAppointmentId === appointment.id
+      ) {
         return;
       }
 
       const service = servicesById.get(appointment.service_id);
       if (!service) {
-        setErrorMessage("Service price not found for this appointment.");
+        setErrorMessage(
+          "Service not found. Refresh services before completing.",
+        );
         return;
       }
 
@@ -262,12 +288,19 @@ export default function DashboardPanel() {
       setSuccessMessage("");
       try {
         await updateAppointmentStatus(appointment.id, "completed");
-        await createIncomeRecord({
-          appointment_id: appointment.id,
-          service_id: appointment.service_id,
-          amount: service.price,
-          recorded_by: adminUserId,
-        });
+        try {
+          await createIncomeRecord({
+            appointment_id: appointment.id,
+            service_id: appointment.service_id,
+            amount: service.price,
+            recorded_by: adminUserId,
+          });
+        } catch (error) {
+          const message = String((error as Error).message ?? "");
+          if (!message.toLowerCase().includes("duplicate")) {
+            throw error;
+          }
+        }
 
         setAppointments((prev) =>
           prev.map((item) =>
@@ -290,6 +323,13 @@ export default function DashboardPanel() {
   const handleCancelAppointment = useCallback(
     async (appointment: AdminAppointment) => {
       if (appointment.status !== "booked") {
+        return;
+      }
+
+      const confirmed = window.confirm(
+        "Cancel this appointment? Make sure you notify the client.",
+      );
+      if (!confirmed) {
         return;
       }
 
@@ -358,6 +398,20 @@ export default function DashboardPanel() {
       return;
     }
 
+    const original = services.find(
+      (service) => service.id === editingService.id,
+    );
+    if (
+      original &&
+      original.duration_min !== editingService.duration_min &&
+      hasBookedAppointmentsForService(editingService.id)
+    ) {
+      setErrorMessage(
+        "Cannot change duration for a service with active appointments.",
+      );
+      return;
+    }
+
     setErrorMessage("");
     setSuccessMessage("");
     try {
@@ -369,10 +423,19 @@ export default function DashboardPanel() {
     } catch (error) {
       setErrorMessage((error as Error).message);
     }
-  }, [editingService, loadDashboardData]);
+  }, [
+    editingService,
+    hasBookedAppointmentsForService,
+    loadDashboardData,
+    services,
+  ]);
 
   const handleDeleteService = useCallback(
     async (serviceId: string) => {
+      if (hasBookedAppointmentsForService(serviceId)) {
+        setErrorMessage("Cannot delete a service with active appointments.");
+        return;
+      }
       const confirmed = window.confirm("Delete this service?");
       if (!confirmed) {
         return;
@@ -388,7 +451,7 @@ export default function DashboardPanel() {
         setErrorMessage((error as Error).message);
       }
     },
-    [loadDashboardData],
+    [hasBookedAppointmentsForService, loadDashboardData],
   );
 
   const handleShiftChange = useCallback(
@@ -429,6 +492,19 @@ export default function DashboardPanel() {
         return;
       }
 
+      const updatedDrafts = shiftDrafts.map((item) =>
+        item.weekday === weekday ? draft : item,
+      );
+      const hasActiveDay = updatedDrafts.some((item) => {
+        const primaryActive = item.primary.is_active;
+        const secondaryActive = item.split_enabled && item.secondary.is_active;
+        return primaryActive || secondaryActive;
+      });
+      if (!hasActiveDay) {
+        setErrorMessage("At least one business day must remain active.");
+        return;
+      }
+
       const primaryValid =
         isValidTime(draft.primary.open_time) &&
         isValidTime(draft.primary.close_time) &&
@@ -445,6 +521,58 @@ export default function DashboardPanel() {
       if (!primaryValid || !secondaryValid) {
         setErrorMessage("Invalid hours. Use HH:MM and start before end.");
         return;
+      }
+
+      const ranges: Array<{ start: number; end: number }> = [];
+      if (draft.primary.is_active) {
+        ranges.push({
+          start: timeToMinutes(draft.primary.open_time),
+          end: timeToMinutes(draft.primary.close_time),
+        });
+      }
+      if (draft.split_enabled && draft.secondary.is_active) {
+        ranges.push({
+          start: timeToMinutes(draft.secondary.open_time),
+          end: timeToMinutes(draft.secondary.close_time),
+        });
+      }
+
+      if (ranges.length > 1) {
+        const sorted = [...ranges].sort((a, b) => a.start - b.start);
+        for (let i = 1; i < sorted.length; i += 1) {
+          if (sorted[i].start < sorted[i - 1].end) {
+            setErrorMessage("Shift ranges cannot overlap.");
+            return;
+          }
+        }
+      }
+
+      const todayISO = getTodayISO();
+      const bookedForDay = appointments.filter((item) => {
+        if (item.status !== "booked") return false;
+        if (item.date_iso < todayISO) return false;
+        const weekdayOfAppointment = new Date(
+          `${item.date_iso}T00:00:00`,
+        ).getDay();
+        return weekdayOfAppointment === draft.weekday;
+      });
+
+      if (bookedForDay.length > 0) {
+        if (ranges.length === 0) {
+          setErrorMessage(
+            "Cannot deactivate this day with active appointments.",
+          );
+          return;
+        }
+        const invalid = bookedForDay.some(
+          (item) => !isWithinRanges(item.slot_time, ranges),
+        );
+        if (invalid) {
+          setErrorMessage(
+            "Existing appointments fall outside the new hours. Adjust hours or reschedule.",
+          );
+          return;
+        }
       }
 
       setErrorMessage("");
@@ -493,7 +621,7 @@ export default function DashboardPanel() {
         setErrorMessage((error as Error).message);
       }
     },
-    [loadDashboardData, shiftDrafts],
+    [appointments, loadDashboardData, shiftDrafts],
   );
 
   const showSpinner = authState === "checking" || isLoading;
@@ -511,7 +639,7 @@ export default function DashboardPanel() {
           <header className="mb-6">
             <div className="mb-4">
               <a
-                href="/"
+                href="/login"
                 className="inline-flex items-center gap-2 border border-[#3d3d3d] px-3 py-2 text-xs uppercase tracking-[0.12em] text-[#bdbdbd] transition hover:border-white hover:text-white"
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -627,7 +755,7 @@ export default function DashboardPanel() {
                   <button
                     type="button"
                     onClick={loadDashboardData}
-                    className="border border-[#3d3d3d] text-white px-3 py-2 text-xs uppercase tracking-[0.12em] transition hover:bg-white hover:text-black inline-flex items-center gap-1 cursor-pointer"
+                    className="border border-[#3d3d3d] text-white px-3 py-2.5 text-xs uppercase tracking-[0.12em] transition hover:bg-white hover:text-black inline-flex items-center gap-1 cursor-pointer"
                   >
                     <RefreshCcw className="h-4 w-4" />
                     Refresh
@@ -684,7 +812,7 @@ export default function DashboardPanel() {
                                 onClick={() =>
                                   handleCompleteAppointment(appointment)
                                 }
-                                className="border border-green-400/60 bg-green-500/10 px-3 py-1 text-xs uppercase tracking-wide text-green-200 transition hover:bg-green-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1 cursor-pointer"
+                                className="border border-green-400/60 bg-green-500/10 px-3 py-1 text-xs uppercase tracking-wide text-green-200 transition hover:bg-green-500/30 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1 cursor-pointer"
                               >
                                 <CalendarCheck className="h-3.5 w-3.5" />
                                 Complete
@@ -697,7 +825,7 @@ export default function DashboardPanel() {
                                 onClick={() =>
                                   handleCancelAppointment(appointment)
                                 }
-                                className="border border-red-400/60 bg-red-500/10 px-3 py-1 text-xs uppercase tracking-wide text-red-200 transition hover:bg-red-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1 cursor-pointer"
+                                className="border border-red-400/60 bg-red-500/10 px-3 py-1 text-xs uppercase tracking-wide text-red-200 transition hover:bg-red-500/30 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1 cursor-pointer"
                               >
                                 <CalendarX className="h-3.5 w-3.5" />
                                 Cancel
@@ -812,7 +940,6 @@ export default function DashboardPanel() {
                 <table className="w-full text-sm text-left text-[#d1d1d1]">
                   <thead className="text-xs uppercase text-[#9d9d9d] border-b border-[#2f2f2f]">
                     <tr>
-                      <th className="py-3 pr-4">ID</th>
                       <th className="py-3 pr-4">Name</th>
                       <th className="py-3 pr-4">Duration</th>
                       <th className="py-3 pr-4">Price</th>
@@ -826,7 +953,6 @@ export default function DashboardPanel() {
                         key={service.id}
                         className="border-b border-[#2a2a2a]"
                       >
-                        <td className="py-3 pr-4">{service.id}</td>
                         <td className="py-3 pr-4">{service.name}</td>
                         <td className="py-3 pr-4">{`${service.duration_min} min`}</td>
                         <td className="py-3 pr-4">{`$${service.price}`}</td>
@@ -864,7 +990,7 @@ export default function DashboardPanel() {
                     {services.length === 0 && (
                       <tr>
                         <td
-                          colSpan={6}
+                          colSpan={5}
                           className="py-4 text-center text-[#9d9d9d]"
                         >
                           No services found.
