@@ -98,7 +98,7 @@ create table if not exists public.appointments (
   customer_email text not null,
   customer_phone text not null,
   notes text null,
-  status text not null default 'booked' check (status in ('booked', 'canceled')),
+  status text not null default 'booked' check (status in ('booked', 'canceled', 'completed')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -115,7 +115,7 @@ create table if not exists public.appointments (
 | `customer_email` | text | Email del cliente |
 | `customer_phone` | text | Teléfono del cliente |
 | `notes` | text | Notas adicionales (opcional) |
-| `status` | text | Estado: 'booked' o 'canceled' |
+| `status` | text | Estado: 'booked', 'canceled' o 'completed' |
 | `created_at` | timestamptz | Fecha de creación |
 | `updated_at` | timestamptz | Fecha de última actualización |
 
@@ -130,6 +130,53 @@ create unique index if not exists uq_appointments_booked_slot
   on public.appointments (date_iso, slot_time)
   where status = 'booked';
 ```
+
+---
+
+### 4. `admin_users` - Usuarios Administradores
+
+Tabla que define qué usuarios tienen acceso de administración.
+
+```sql
+create table if not exists public.admin_users (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  unique (user_id)
+);
+```
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `id` | uuid | ID único |
+| `user_id` | uuid | Referencia al usuario en auth.users |
+| `created_at` | timestamptz | Fecha de creación |
+
+---
+
+### 5. `business_income` - Ingresos del Negocio
+
+Registra ingresos generados por turnos completados.
+
+```sql
+create table if not exists public.business_income (
+  id uuid primary key default gen_random_uuid(),
+  appointment_id uuid not null references public.appointments(id) on delete cascade,
+  service_id text not null,
+  amount numeric not null,
+  recorded_by uuid not null references auth.users(id),
+  created_at timestamptz not null default now(),
+  unique (appointment_id)
+);
+```
+
+| Columna | Tipo | Descripción |
+|---------|------|-------------|
+| `appointment_id` | uuid | Cita completada |
+| `service_id` | text | Servicio asociado |
+| `amount` | numeric | Monto ingresado |
+| `recorded_by` | uuid | Admin que registró |
+| `created_at` | timestamptz | Fecha de registro |
 
 ---
 
@@ -154,6 +201,15 @@ on public.services
 for select
 to anon
 using (active = true);
+
+-- Admin puede gestionar servicios
+drop policy if exists "services_admin_all" on public.services;
+create policy "services_admin_all"
+on public.services
+for all
+to authenticated
+using (exists (select 1 from public.admin_users au where au.user_id = auth.uid()))
+with check (exists (select 1 from public.admin_users au where au.user_id = auth.uid()));
 ```
 
 ### Tabla `business_shifts`
@@ -175,6 +231,15 @@ on public.business_shifts
 for select
 to anon
 using (is_active = true);
+
+-- Admin puede gestionar horarios
+drop policy if exists "business_shifts_admin_all" on public.business_shifts;
+create policy "business_shifts_admin_all"
+on public.business_shifts
+for all
+to authenticated
+using (exists (select 1 from public.admin_users au where au.user_id = auth.uid()))
+with check (exists (select 1 from public.admin_users au where au.user_id = auth.uid()));
 ```
 
 ### Tabla `appointments`
@@ -206,6 +271,56 @@ for update
 to authenticated
 using (auth.uid() = user_id)
 with check (auth.uid() = user_id);
+
+-- Admin puede ver y actualizar todas las citas
+drop policy if exists "appointments_admin_all" on public.appointments;
+create policy "appointments_admin_all"
+on public.appointments
+for all
+to authenticated
+using (exists (select 1 from public.admin_users au where au.user_id = auth.uid()))
+with check (exists (select 1 from public.admin_users au where au.user_id = auth.uid()));
+
+### Tabla `admin_users`
+
+```sql
+alter table public.admin_users enable row level security;
+
+drop policy if exists "admin_users_select_self" on public.admin_users;
+create policy "admin_users_select_self"
+on public.admin_users
+for select
+to authenticated
+using (auth.uid() = user_id);
+
+drop policy if exists "admin_users_admin_select" on public.admin_users;
+create policy "admin_users_admin_select"
+on public.admin_users
+for select
+to authenticated
+using (exists (select 1 from public.admin_users au where au.user_id = auth.uid()));
+
+drop policy if exists "admin_users_admin_insert" on public.admin_users;
+create policy "admin_users_admin_insert"
+on public.admin_users
+for insert
+to authenticated
+with check (exists (select 1 from public.admin_users au where au.user_id = auth.uid()));
+```
+
+### Tabla `business_income`
+
+```sql
+alter table public.business_income enable row level security;
+
+drop policy if exists "business_income_admin_all" on public.business_income;
+create policy "business_income_admin_all"
+on public.business_income
+for all
+to authenticated
+using (exists (select 1 from public.admin_users au where au.user_id = auth.uid()))
+with check (exists (select 1 from public.admin_users au where au.user_id = auth.uid()));
+```
 ```
 
 ---
@@ -516,9 +631,28 @@ create table if not exists public.appointments (
   customer_email text not null,
   customer_phone text not null,
   notes text null,
-  status text not null default 'booked' check (status in ('booked', 'canceled')),
+  status text not null default 'booked' check (status in ('booked', 'canceled', 'completed')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
+);
+
+-- Tabla de admins
+create table if not exists public.admin_users (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  unique (user_id)
+);
+
+-- Tabla de ingresos
+create table if not exists public.business_income (
+  id uuid primary key default gen_random_uuid(),
+  appointment_id uuid not null references public.appointments(id) on delete cascade,
+  service_id text not null,
+  amount numeric not null,
+  recorded_by uuid not null references auth.users(id),
+  created_at timestamptz not null default now(),
+  unique (appointment_id)
 );
 
 -- Índices
@@ -548,6 +682,21 @@ alter table public.appointments enable row level security;
 create policy "appointments_select_own" on public.appointments for select to authenticated using (auth.uid() = user_id);
 create policy "appointments_insert_own" on public.appointments for insert to authenticated with check (auth.uid() = user_id);
 create policy "appointments_update_own" on public.appointments for update to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Admin users
+alter table public.admin_users enable row level security;
+create policy "admin_users_select_self" on public.admin_users for select to authenticated using (auth.uid() = user_id);
+create policy "admin_users_admin_select" on public.admin_users for select to authenticated using (exists (select 1 from public.admin_users au where au.user_id = auth.uid()));
+create policy "admin_users_admin_insert" on public.admin_users for insert to authenticated with check (exists (select 1 from public.admin_users au where au.user_id = auth.uid()));
+
+-- Business income
+alter table public.business_income enable row level security;
+create policy "business_income_admin_all" on public.business_income for all to authenticated using (exists (select 1 from public.admin_users au where au.user_id = auth.uid())) with check (exists (select 1 from public.admin_users au where au.user_id = auth.uid()));
+
+-- Admin overrides
+create policy "services_admin_all" on public.services for all to authenticated using (exists (select 1 from public.admin_users au where au.user_id = auth.uid())) with check (exists (select 1 from public.admin_users au where au.user_id = auth.uid()));
+create policy "business_shifts_admin_all" on public.business_shifts for all to authenticated using (exists (select 1 from public.admin_users au where au.user_id = auth.uid())) with check (exists (select 1 from public.admin_users au where au.user_id = auth.uid()));
+create policy "appointments_admin_all" on public.appointments for all to authenticated using (exists (select 1 from public.admin_users au where au.user_id = auth.uid())) with check (exists (select 1 from public.admin_users au where au.user_id = auth.uid()));
 ```
 
 ### Paso 3: Funciones RPC

@@ -1,0 +1,12 @@
+---
+import Layout from "../layouts/Layout.astro";
+import DashboardPanel from "../components/admin/DashboardPanel";
+---
+
+<Layout
+  title="BeardCut | Dashboard"
+  description="Admin dashboard for BeardCut Barbershop."
+  noIndex={true}
+>
+  <DashboardPanel client:load />
+</Layout>

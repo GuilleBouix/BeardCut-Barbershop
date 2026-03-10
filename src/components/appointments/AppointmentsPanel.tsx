@@ -594,10 +594,12 @@ export default function AppointmentsPanel() {
     }
   };
 
-  if (authState === "checking") {
+  if (authState === "checking" || isLoading) {
     return (
       <section className="min-h-screen px-4 py-20 flex items-center justify-center">
-        <p className="text-[#bdbdbd]">Checking session...</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
+          <div className="h-14 w-14 animate-spin rounded-full border-4 border-white border-t-transparent" />
+        </div>
       </section>
     );
   }
@@ -615,34 +617,7 @@ export default function AppointmentsPanel() {
         </header>
 
         <div className="bg-[#101010] border border-[#3d3d3d] text-[#8f8f8f] p-3 sm:p-5 lg:p-6 animate-fade-down animate-duration-700 animate-delay-300">
-          {isLoading ? (
-            <div className="space-y-6 animate-pulse">
-              <div className="h-8 w-60 bg-[#1f1f1f]" />
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <div className="h-5 w-40 bg-[#1f1f1f]" />
-                  <div className="h-12 w-full bg-[#1a1a1a]" />
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-                    <div className="h-10 bg-[#1f1f1f]" />
-                    <div className="h-10 bg-[#1f1f1f]" />
-                    <div className="h-10 bg-[#1f1f1f]" />
-                    <div className="h-10 bg-[#1f1f1f]" />
-                    <div className="h-10 bg-[#1f1f1f]" />
-                  </div>
-                  <div className="h-60 w-full bg-[#1a1a1a]" />
-                </div>
-                <div className="space-y-3">
-                  <div className="h-5 w-48 bg-[#1f1f1f]" />
-                  <div className="h-10 w-full bg-[#1a1a1a]" />
-                  <div className="h-10 w-full bg-[#1a1a1a]" />
-                  <div className="h-10 w-full bg-[#1a1a1a]" />
-                  <div className="h-10 w-full bg-[#1a1a1a]" />
-                  <div className="h-20 w-full bg-[#1a1a1a]" />
-                  <div className="h-10 w-full bg-[#f0f0f0]/20" />
-                </div>
-              </div>
-            </div>
-          ) : activeAppointment ? (
+          {activeAppointment ? (
             <div className="border border-[#3d3d3d] bg-[#141414] p-4 sm:p-5">
               <h2 className="text-xl text-white font-semibold">
                 Your Current Appointment

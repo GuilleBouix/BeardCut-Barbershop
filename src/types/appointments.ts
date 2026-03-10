@@ -5,7 +5,7 @@ export interface AppointmentService {
     price: number;
 }
 
-export type AppointmentStatus = 'booked' | 'canceled';
+export type AppointmentStatus = 'booked' | 'canceled' | 'completed';
 export type AuthState = 'checking' | 'authenticated' | 'unauthenticated';
 
 export interface TimeSlot {
